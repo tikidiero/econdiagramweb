@@ -1,5 +1,10 @@
 import {curveIntersections} from './bezier.js'
 
+//Fix:
+//Make checkbox work
+//Make supply slider input box work
+
+
 let default_parameters = {
     "demand_curve": [[0 ,0], [1 ,1]],
     "supply_curve": [[0, 1], [1, 0]],
@@ -18,7 +23,7 @@ export class Diagram {
       this.ylabel = ylabel
     }
     
-    transform(points, dilationFactor, curveName) {
+    transform(points, dilationFactor, shiftFactor, curveName) {
         let newPoints = []; 
         for (let point of points) {
             let x = point[0] // [0, 1]
@@ -27,15 +32,16 @@ export class Diagram {
             newY *= dilationFactor // [dilationFactor, 0]
             newY = 1 - newY
 
-            newPoints.push([x, newY])
+            newY -= shiftFactor/100
             
+            newPoints.push([x, newY]) 
         }
         return newPoints;
 
     }
 
-    generateBezierPoints(undilatedPoints, dilationFactor) {
-        let points = this.transform(undilatedPoints, dilationFactor)
+    generateBezierPoints(undilatedPoints, dilationFactor, shiftFactor) {
+        let points = this.transform(undilatedPoints, dilationFactor, shiftFactor)
 
         let newPoints = [];
         let until4 = 4 - points.length;
@@ -62,8 +68,9 @@ export class Diagram {
     }
     
     sameLine(graphA, graphB) {
+
         const startPoint = [graphA[0], graphA[1]]
-        const endPoint = [graphA[graphA.length-1], graphA[graphA.length-2]]
+        const endPoint = [graphA[graphA.length-2], graphA[graphA.length-1]]
         const slope = (endPoint[1] - startPoint[1])/(endPoint[0]-startPoint[0])
         const intercept = startPoint[1]-slope*startPoint[0]
         
@@ -74,7 +81,7 @@ export class Diagram {
             const hypotheticalY = slope*x + intercept
 
             const diff = Math.abs(realY - hypotheticalY)
-            // console.log("slope", endPoint[1], startPoint[1], intercept)
+            // console.log(endPoint[1]-startPoint[1])
 
             if (diff > 0.01) {
                 return false                 
@@ -85,7 +92,7 @@ export class Diagram {
 
     display()  {
 
-        let not_drawn_curves = this.parameters.curves.slice()
+        let notDrawnCurves = this.parameters.curves.slice()
 
         this.ctx.fillStyle = "rgb(228,246,248)"
         this.ctx.fillRect(0, 0, this.width, this.height)
@@ -95,12 +102,12 @@ export class Diagram {
 
         if (this.parameters.curves.includes("demand_curve")) {
 
-            const demandindex = not_drawn_curves.indexOf("demand_curve")
+            const demandindex = notDrawnCurves.indexOf("demand_curve")
             if (demandindex !== -1){
-                not_drawn_curves.splice(demandindex, 1)
+                notDrawnCurves.splice(demandindex, 1)
             }
 
-            let demandCurve = this.generateBezierPoints(default_parameters.demand_curve, this.parameters.demand_slope)
+            let demandCurve = this.generateBezierPoints(default_parameters.demand_curve, this.parameters.demand_slope, this.parameters.demand_shift)
             allCurves.push(demandCurve)
             
             this.ctx.beginPath()
@@ -113,12 +120,12 @@ export class Diagram {
 
         if (this.parameters.curves.includes("supply_curve")) {
 
-            const supplyindex = not_drawn_curves.indexOf("supply_curve")
+            const supplyindex = notDrawnCurves.indexOf("supply_curve")
             if (supplyindex !== -1){
-                not_drawn_curves.splice(supplyindex, 1)
+                notDrawnCurves.splice(supplyindex, 1)
             }
 
-            let supplyCurve = this.generateBezierPoints(default_parameters.supply_curve, this.parameters.supply_slope)
+            let supplyCurve = this.generateBezierPoints(default_parameters.supply_curve, this.parameters.supply_slope, 0)
             allCurves.push(supplyCurve)
     
             this.ctx.beginPath()
@@ -129,10 +136,10 @@ export class Diagram {
             this.ctx.closePath()
             this.ctx.stroke()
         
-        if (not_drawn_curves.length > 0){
-            for (let curveName of not_drawn_curves) {
+        if (notDrawnCurves.length > 0){
+            for (let curveName of notDrawnCurves) {
 
-                let curve = this.generateBezierPoints(default_parameters[curveName], 1)
+                let curve = this.generateBezierPoints(default_parameters[curveName], 1, 0)
                 allCurves.push(curve)
     
                 this.ctx.beginPath()
@@ -143,7 +150,8 @@ export class Diagram {
                 this.ctx.closePath()
                 this.ctx.stroke()
             }
-}
+            }
+
         for (let i = allCurves.length-1; i >= 0; i--) {
             for (let j = 0; j < allCurves.length-1; j++) {
                 // console.log(i, j)
@@ -162,7 +170,7 @@ export class Diagram {
             allCurves.pop()
             
         }
-
+        console.log(intersections)
 
         for (let intersection of intersections) {
             this.ctx.beginPath();
@@ -191,23 +199,23 @@ export class Diagram {
             // Reset line dash pattern to solid
             this.ctx.setLineDash([]);
 
+            console.log("callled")
+
+            //Shade CS area
+            this.ctx.fillStyle = "rgb(0, 228, 0, 0.2)"
+            this.ctx.beginPath()
+            this.ctx.moveTo(0, intersection[1]) //Start point (0, Pm)
+            this.ctx.lineTo(intersection[0], intersection[1]) //Equilibrium
+            this.ctx.lineTo(0, this.height) //End point (0, 0) => calculate y coords with y-int later
+            this.ctx.closePath()
+            this.ctx.fill()
+
             //Shade TR area
             this.ctx.fillStyle = "rgb(228, 0, 0, 0.1)"
             this.ctx.fillRect(0, intersection[1], intersection[0], this.height-intersection[1])
             
-            let showTRCheckbox = document.getElementById('showTR');
-
-            showTRCheckbox.addEventListener('change', () => {
-
-            let showTR = showTRCheckbox.checked;
             
-            if (showTR) {
-            console.log('Total Revenue checkbox is checked.');
-            } //else {
-            // console.log('Total Revenue checkbox is unchecked.');
-            // }
-        });
-            }
+        }
 
         
         
