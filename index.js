@@ -92,6 +92,9 @@ export class Diagram {
 
     display()  {
 
+
+        const curves = this.parameters.curves 
+
         let notDrawnCurves = this.parameters.curves.slice()
 
         this.ctx.fillStyle = "rgb(228,246,248)"
@@ -100,57 +103,20 @@ export class Diagram {
         let allCurves = []
         let intersections = []
 
-        if (this.parameters.curves.includes("demand_curve")) {
+        for (const curve of curves) {
 
-            const demandindex = notDrawnCurves.indexOf("demand_curve")
-            if (demandindex !== -1){
-                notDrawnCurves.splice(demandindex, 1)
-            }
-
-            let demandCurve = this.generateBezierPoints(default_parameters.demand_curve, this.parameters.demand_slope, this.parameters.demand_shift)
-            allCurves.push(demandCurve)
+            let curvePoints = this.generateBezierPoints(default_parameters[curve], this.parameters[`${curve}_stretch`], this.parameters[`${curve}_shift`])
+            allCurves.push(curvePoints)
             
             this.ctx.beginPath()
-            this.ctx.moveTo(demandCurve[0], demandCurve[1])
-            this.ctx.bezierCurveTo(demandCurve[2], demandCurve[3], demandCurve[4], demandCurve[5], demandCurve[6], demandCurve[7])
+            this.ctx.moveTo(curvePoints[0], curvePoints[1])
+            this.ctx.bezierCurveTo(curvePoints[2], curvePoints[3], curvePoints[4], curvePoints[5], curvePoints[6], curvePoints[7])
             this.ctx.strokeStyle = "blue"
             this.ctx.lineWidth = 2
             this.ctx.closePath()
             this.ctx.stroke()
+        }
 
-        if (this.parameters.curves.includes("supply_curve")) {
-
-            const supplyindex = notDrawnCurves.indexOf("supply_curve")
-            if (supplyindex !== -1){
-                notDrawnCurves.splice(supplyindex, 1)
-            }
-
-            let supplyCurve = this.generateBezierPoints(default_parameters.supply_curve, this.parameters.supply_slope, 0)
-            allCurves.push(supplyCurve)
-    
-            this.ctx.beginPath()
-            this.ctx.moveTo(supplyCurve[0], supplyCurve[1])
-            this.ctx.bezierCurveTo(supplyCurve[2], supplyCurve[3], supplyCurve[4], supplyCurve[5], supplyCurve[6], supplyCurve[7])
-            this.ctx.strokeStyle = "red"; // You can set the color for the supply curve
-            this.ctx.lineWidth = 2
-            this.ctx.closePath()
-            this.ctx.stroke()
-        
-        if (notDrawnCurves.length > 0){
-            for (let curveName of notDrawnCurves) {
-
-                let curve = this.generateBezierPoints(default_parameters[curveName], 1, 0)
-                allCurves.push(curve)
-    
-                this.ctx.beginPath()
-                this.ctx.moveTo(curve[0], curve[1])
-                this.ctx.bezierCurveTo(curve[2], curve[3], curve[4], curve[5], curve[6], curve[7])
-                this.ctx.strokeStyle = "blue"
-                this.ctx.lineWidth = 2
-                this.ctx.closePath()
-                this.ctx.stroke()
-            }
-            }
 
         for (let i = allCurves.length-1; i >= 0; i--) {
             for (let j = 0; j < allCurves.length-1; j++) {
@@ -170,7 +136,7 @@ export class Diagram {
             allCurves.pop()
             
         }
-        console.log(intersections)
+        // console.log(intersections)
 
         for (let intersection of intersections) {
             this.ctx.beginPath();
@@ -199,8 +165,6 @@ export class Diagram {
             // Reset line dash pattern to solid
             this.ctx.setLineDash([]);
 
-            console.log("callled")
-
             //Shade CS area
             this.ctx.fillStyle = "rgb(0, 228, 0, 0.2)"
             this.ctx.beginPath()
@@ -221,5 +185,4 @@ export class Diagram {
         
     }
 }
-}
-}
+
