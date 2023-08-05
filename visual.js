@@ -3,7 +3,7 @@ import { createElements } from './interactive.js'
 
 let parameters = {
     // "curves": ["cost_curve", "price_floor", "demand_curve", "supply_curve", "AD_curve", "AS_curve"]
-    "curves": ["demand_curve", "supply_curve", "laffer_curve"],
+    "curves": ["demand_curve", "supply_curve"],
     "demand_curve_stretch": 1,
     "supply_curve_stretch": 1,
     "demand_curve_shift": 0,

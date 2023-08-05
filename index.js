@@ -2,7 +2,7 @@ import {curveIntersections} from './bezier.js'
 
 //Fix:
 //Make checkbox work
-//Make supply slider input box work
+//Make supply shift work
 
 
 let default_parameters = {
@@ -32,7 +32,7 @@ export class Diagram {
             newY *= dilationFactor // [dilationFactor, 0]
             newY = 1 - newY
 
-            newY -= shiftFactor/100
+            newY -= shiftFactor/100 //Make it shift the x somehow
             
             newPoints.push([x, newY]) 
         }
@@ -90,6 +90,29 @@ export class Diagram {
         return true 
     }
 
+    distSqr(p1, p2) {
+        return (p1[0] - p2[0]) ** 2 + (p2[1] - p1[1]) ** 2 
+    }
+
+    removeSimilarPoints(points) {
+        const newPoints = []
+        for (const point of points) {
+            let diffPoint = true
+            for (const newPoint of newPoints) {
+                const distBetween = this.distSqr(point, newPoint) 
+                if (distBetween < 0.1) { // diff point
+                    diffPoint = false
+                    break  
+                }
+            }
+            if (diffPoint) {
+                newPoints.push(point)
+            }
+
+        }
+        return newPoints
+    }
+
     display()  {
 
 
@@ -117,12 +140,15 @@ export class Diagram {
             this.ctx.stroke()
         }
 
+        
 
-        for (let i = allCurves.length-1; i >= 0; i--) {
-            for (let j = 0; j < allCurves.length-1; j++) {
+        const newAllCurves = [...allCurves]
+
+        for (let i = newAllCurves.length-1; i >= 0; i--) {
+            for (let j = 0; j < newAllCurves.length-1; j++) {
                 // console.log(i, j)
-                if (!this.sameLine(allCurves[i], allCurves[j])) {
-                    let foundIntersections = curveIntersections(allCurves[i], allCurves[j], 0.0, 1.0, 0.0, 1.0,
+                if (!this.sameLine(newAllCurves[i], newAllCurves[j])) {
+                    let foundIntersections = curveIntersections(newAllCurves[i], newAllCurves[j], 0.0, 1.0, 0.0, 1.0,
                         1.0, false, 0, 25, 0.5)
                     for (let foundIntersection of foundIntersections) {
                         intersections.push(foundIntersection[1])
@@ -133,10 +159,33 @@ export class Diagram {
                 
                 
             }
-            allCurves.pop()
+            newAllCurves.pop()
             
         }
+        intersections = this.removeSimilarPoints(intersections)
+        
+        const allYIntercepts = []
+        for (const curve of allCurves) {
+            const firstPointY = curve[1]
+            allYIntercepts.push(firstPointY)
+        }
+
+        let maxY = 0 
+        for (const firstPointY of allYIntercepts) {
+            if (firstPointY > maxY) {
+                maxY = firstPointY
+            }
+        }
+
+        let minY = Infinity 
+        for (const firstPointY of allYIntercepts) {
+            if (firstPointY < minY) {
+                minY = firstPointY
+            }
+        }
         // console.log(intersections)
+
+        
 
         for (let intersection of intersections) {
             this.ctx.beginPath();
@@ -165,18 +214,27 @@ export class Diagram {
             // Reset line dash pattern to solid
             this.ctx.setLineDash([]);
 
-            //Shade CS area
+            //Shade PS area
             this.ctx.fillStyle = "rgb(0, 228, 0, 0.2)"
             this.ctx.beginPath()
             this.ctx.moveTo(0, intersection[1]) //Start point (0, Pm)
             this.ctx.lineTo(intersection[0], intersection[1]) //Equilibrium
-            this.ctx.lineTo(0, this.height) //End point (0, 0) => calculate y coords with y-int later
+            this.ctx.lineTo(0, maxY) //End point (0, 0) => calculate y coords with y-int later
+            this.ctx.closePath()
+            this.ctx.fill()
+
+            //Shade CS area
+            this.ctx.fillStyle = "rgb(0, 0, 228, 0.2)"
+            this.ctx.beginPath()
+            this.ctx.moveTo(0, intersection[1]) //Start point (0, Pm)
+            this.ctx.lineTo(intersection[0], intersection[1]) //Equilibrium
+            this.ctx.lineTo(0, minY) //End point (0, 0) => calculate y coords with y-int later
             this.ctx.closePath()
             this.ctx.fill()
 
             //Shade TR area
-            this.ctx.fillStyle = "rgb(228, 0, 0, 0.1)"
-            this.ctx.fillRect(0, intersection[1], intersection[0], this.height-intersection[1])
+            // this.ctx.fillStyle = "rgb(228, 0, 0, 0.1)"
+            // this.ctx.fillRect(0, intersection[1], intersection[0], this.height-intersection[1])
             
             
         }
