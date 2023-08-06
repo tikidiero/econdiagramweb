@@ -20,6 +20,19 @@ let sliderParameters = {
 
 const canvas = document.querySelector("canvas")
 const ctx = canvas.getContext("2d")
+
+
+// Adjust canvas dimensions for high-DPI screens
+// const devicePixelRatio = window.devicePixelRatio || 1;
+// canvas.width = 600;
+const divWidth = $("#canvasContainer").width()
+console.log(divWidth)
+canvas.width = divWidth;
+canvas.height = divWidth;
+
+// Scale the canvas context based on the device pixel ratio
+// ctx.scale(devicePixelRatio, devicePixelRatio);
+
 console.log(canvas.width, canvas.height)
 
 let diagram1 = new Diagram(canvas, parameters, "XLABEL", "YLABEL") 

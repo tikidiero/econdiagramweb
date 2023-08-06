@@ -4,45 +4,86 @@ html, body {
     overflow: hidden;
 }
 
-#canvasContainer {
+/* #canvasContainer {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100%;
-}
-
-canvas {
-    border: 2px solid black;
-}
+} */
 
 .sliders {
-    width: 20%;
-    outline: none;
-    opacity: 0.7;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-    position: relative;
-    left: 50px;
-    top: -600px;
+  outline: none;
+  opacity: 0.7;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 15px;
+  position: relative;
   }
-  
-  label {
-    font-size: 14px;
-    font-weight: bold;
-  }
+
+label {
+  font-size: 14px;
+  font-weight: bold;
+}
 
 .checkbox-container {
-    outline: none;
-    opacity: 0.7;
-    gap: 20px;
-    position: relative;
-    left: 300px;
-    top: -100px;
-    margin-bottom: 10px;
-  }
+  outline: none;
+  opacity: 0.7;
+  gap: 20px;
+  left: 50%;
+  text-align: center;
+  margin-bottom: 10px;
+}
 
-  .hidden {
-    visibility: hidden; 
-  }
+/* .checkbox-container > div{
+  
+} */
+
+.hidden {
+  visibility: hidden; 
+}
+
+.curveListContainer {
+  display: inline-block;
+  height: 50px; /*sets height of element*/
+  border: 2px solid cornflowerblue; /*sets the background of this element (here a solid colour)*/
+  padding-left: 20px; /*sets 'padding'*/
+  padding-right: 20px; /*sets 'padding'*/
+  line-height: 50px; /*for this, it sets vertical alignment*/
+  margin: 5px;
+  margin-right: 10px;
+}
+
+.singular {
+  border: 2px solid red;
+  height: 500px;
+  /* width: 200px; */
+}
+
+.pairs {
+  border: 2px solid blue;
+  height: 500px;
+  /* width: 200px; */
+}
+
+.layoutGrid {
+  display: grid;
+  grid-template-columns: 20% 40% 20% 20%;
+  /* border: 10px solid red; */
+  /* justify-content: space-around; */
+}
+/* .layoutGrid > * {
+  border: 5px solid blue;
+} */
+
+canvas {
+  border: 2px solid black;
+  /* width: 100%; */
+  /* height: 100%; */
+  /* margin: 0px 0px 0px 0px; */
+} 
+
+#canvasContainer {
+  border: 0px solid black
+  /* background-color: red */
+}

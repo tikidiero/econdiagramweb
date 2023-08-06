@@ -11,6 +11,12 @@ let default_parameters = {
     "laffer_curve": [[0, 1], [0.5, 0.2], [1, 1]],
 }
 
+export class Curve { 
+    constructor(curveType, stretch, shift) {
+
+    }
+}
+
 export class Diagram {
 
     constructor(canvas_obj, parameters, xlabel, ylabel) {
