@@ -25,7 +25,7 @@ export class Diagram {
       this.width = canvas_obj.width; 
       this.height = canvas_obj.height; 
       this.parameters = parameters 
-      this.xlabel = xlabel 
+      this.xlabel = xlabel
       this.ylabel = ylabel
     }
     
@@ -120,7 +120,6 @@ export class Diagram {
     }
 
     display()  {
-
 
         const curves = this.parameters.curves 
 

@@ -1,89 +1,136 @@
+/* Reset some default styles and apply a background color to the body */
 html, body {
-    height: 100%;
-    margin: 0;
-    overflow: hidden;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  /* background-color: #f0f0f0; */
+  /* background: linear-gradient(to right, #ff7f50, #87ceeb); */
+  background:
+    radial-gradient(circle, rgba(49,189,218,0.2) 0%, rgba(48,48,117,0.2) 35%, rgba(106,196,214,1) 100%),
+    url("https://assets.st-note.com/production/uploads/images/45667453/b580d004fd6b7dd07297fb9eac92d209.jpg");
+  font-family: 'Roboto', sans-serif;
 }
 
-/* #canvasContainer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-} */
+/* Center everything vertically and horizontally */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
 
+/* Style for the sliders container */
 .sliders {
-  outline: none;
-  opacity: 0.7;
+  opacity: 0.9;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 15px;
-  position: relative;
-  }
+  padding: 20px;
+  background-color: white;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+}
 
+/* Style for labels */
 label {
   font-size: 14px;
   font-weight: bold;
 }
 
+/* Style for the checkbox container */
 .checkbox-container {
-  outline: none;
-  opacity: 0.7;
+  opacity: 0.9;
   gap: 20px;
-  left: 50%;
   text-align: center;
   margin-bottom: 10px;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%); /* Center the container horizontally */
+  padding: 10px; /* Add some padding */
+  background-color: white;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+  border-radius: 5px; /* Add rounded corners */
 }
 
-/* .checkbox-container > div{
-  
-} */
-
-.hidden {
-  visibility: hidden; 
-}
-
+/* Style for the curve list container */
 .curveListContainer {
   display: inline-block;
-  height: 50px; /*sets height of element*/
-  border: 2px solid cornflowerblue; /*sets the background of this element (here a solid colour)*/
-  padding-left: 20px; /*sets 'padding'*/
-  padding-right: 20px; /*sets 'padding'*/
-  line-height: 50px; /*for this, it sets vertical alignment*/
+  height: 50px;
+  border: 2px solid cornflowerblue;
+  padding: 0 20px;
+  line-height: 50px;
   margin: 5px;
   margin-right: 10px;
+  position: relative;
+  background-color: white;
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+  border-radius: 5px; /* Add rounded corners */
 }
 
+/* Style for singular curve container */
 .singular {
   border: 2px solid red;
   height: 500px;
-  /* width: 200px; */
 }
 
+/* Style for pairs curve container */
 .pairs {
   border: 2px solid blue;
   height: 500px;
-  /* width: 200px; */
 }
 
+/* Style for the layout grid */
 .layoutGrid {
   display: grid;
   grid-template-columns: 20% 40% 20% 20%;
-  /* border: 10px solid red; */
-  /* justify-content: space-around; */
+  gap: 20px;
+  justify-content: space-around;
+  width: 100%; /* Added width for proper alignment */
+  max-width: 1200px; /* Limit the maximum width of the grid */
+  margin: 0 auto; /* Center the grid horizontally */
 }
-/* .layoutGrid > * {
-  border: 5px solid blue;
-} */
 
+
+/* Style for the canvas */
 canvas {
   border: 2px solid black;
-  /* width: 100%; */
-  /* height: 100%; */
-  /* margin: 0px 0px 0px 0px; */
-} 
+  /* width: 100%;
+  height: 100%; */
+}
 
+/* Style for the canvas container */
 #canvasContainer {
-  border: 0px solid black
-  /* background-color: red */
+  background-color: white;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Style for the "Add Curve" button */
+.curveAdd {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  width: 70%;
+  transform: translateX(-50%);
+  text-align: center;
+  background-color: #007bff;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Style for hovered strikethrough */
+.strikethroughHover:hover {
+  text-decoration-line: line-through;
+  text-decoration-thickness: 2px;
+}
+
+/* Style for selected elements */
+.selected {
+  background-color: lightblue;
 }
