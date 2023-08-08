@@ -189,6 +189,22 @@ $(document).ready(() => {
         const textB = curveB.text()
 
         if (!textA || !textB) return
+        if (textA == textB) return
+
+        const isDuplicate = $("#pairCurveList li").filter(function () {
+            const curveIDA = $(this).data("curveid_a")
+            const curveIndexA = $(this).data("curveindex_a")
+            const curveIDB = $(this).data("curveid_b")
+            const curveIndexB = $(this).data("curveindex_b")
+    
+            return (curveIDA === dataCurveID_A && curveIndexA === dataCurveIndex_A &&
+                    curveIDB === dataCurveID_B && curveIndexB === dataCurveIndex_B)
+        }).length > 0
+    
+        if (isDuplicate) {
+            alert("This curve pair is already added loser.")
+            return
+        }
 
     
         const listElement = $('<li>', {
@@ -247,9 +263,23 @@ $(document).ready(() => {
     })
     
     $("#pairCurveList").on("click", "li", function () {
-        preventDefault()
         $(this).addClass("selected")
         $(this).siblings().removeClass("selected")
     });
+
+    $("#downloadbtn").on("click", () => {
+        var canvas = document.querySelector("#canvas")
+        var image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream")
+        
+        var element = document.createElement('a')
+        var filename = 'test.png'
+        element.setAttribute('href', image)
+        element.setAttribute('download', filename)
+        element.style.display = 'none'
+        
+        document.body.appendChild(element)
+        element.click()
+        document.body.removeChild(element)
+    })
 
 })

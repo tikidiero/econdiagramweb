@@ -6,6 +6,7 @@
     <script type="module" src="./bezier.js" defer></script>
     <script type="module" src="./visual.js" defer></script>
     <script type="module" src="./interactive.js" defer></script>
+    <script type="module" src="./index.js" defer></script>
 
 
     <meta charset="UTF-8">
@@ -22,7 +23,8 @@
       <div class="layoutGrid">
         <div class="sliders"></div>
         <div id="canvasContainer">
-          <canvas></canvas>
+          <canvas id="canvas"></canvas>
+          <button id="downloadbtn" download="canvas.jpg">Save Diagram</button>
           <div class="checkbox-container">
             <input name="checkbox1" type="checkbox" id="showTR">
             <label for="checkbox1">Total Revenue</label>
@@ -44,6 +46,15 @@
             <select name="curvePairsB" id="curvePairListB"></select>
             <button type="button" id="addCurvePairButton">Add</button>
           </div>
+        </div>
+        <div class="editorContainer">
+          <label>x-axis name</label>
+          <input id="xlabelname" type="text"></input>
+          <button id="xaxiseditorbutton">Change</button>
+          <label>y-axis name</label>
+          <input id="ylabelname" type="text"></input>
+          <button id="yaxiseditorbutton">Change</button>
+
         </div>
 
       </div>

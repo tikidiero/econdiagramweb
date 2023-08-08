@@ -1,8 +1,9 @@
 import {curveIntersections} from './bezier.js'
 
-//Fix:
+//To Do:
 //Make checkbox work
-//Make supply shift work
+//Make multiple curves possible
+//change css so that more of the space is used
 
 
 let default_parameters = {
@@ -125,8 +126,13 @@ export class Diagram {
 
         let notDrawnCurves = this.parameters.curves.slice()
 
-        this.ctx.fillStyle = "rgb(228,246,248)"
+        this.ctx.resetTransform()
+        this.ctx.fillStyle = "rgb(228,246,248)" //"rgb(228,246,248)"
         this.ctx.fillRect(0, 0, this.width, this.height)
+
+        const scaleFactor = 0.9
+        this.ctx.setTransform(scaleFactor, 0, 0, scaleFactor, this.width*(1-scaleFactor), 0);
+
 
         let allCurves = []
         let intersections = []
@@ -139,8 +145,8 @@ export class Diagram {
             this.ctx.beginPath()
             this.ctx.moveTo(curvePoints[0], curvePoints[1])
             this.ctx.bezierCurveTo(curvePoints[2], curvePoints[3], curvePoints[4], curvePoints[5], curvePoints[6], curvePoints[7])
-            this.ctx.strokeStyle = "blue"
-            this.ctx.lineWidth = 2
+            this.ctx.strokeStyle = "black"
+            this.ctx.lineWidth = 3
             this.ctx.closePath()
             this.ctx.stroke()
         }
@@ -243,8 +249,42 @@ export class Diagram {
             
             
         }
+        this.ctx.resetTransform()
 
+        const axisStartX = this.width*(1-scaleFactor)
+        const axisStartY = this.height*(1-scaleFactor)
         
+
+        this.ctx.fillStyle = "rgb(255,255,255)" 
+        this.ctx.fillRect(0, 0, axisStartX, this.height)
+        this.ctx.fillRect(0, this.height - axisStartY, this.width, this.height)
+        
+
+        // Draw x-axis
+        this.ctx.strokeStyle = 'black';
+        this.ctx.lineWidth = 5;
+        this.ctx.beginPath();
+        this.ctx.moveTo(axisStartX, 0);
+        this.ctx.lineTo(axisStartX, this.height - this.height*(1-scaleFactor)/1);
+        this.ctx.stroke();
+                
+        // Draw y-axis
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.width*(1-scaleFactor)/1, this.height - axisStartY);
+        this.ctx.lineTo(this.width, this.height - axisStartY);
+        this.ctx.stroke();
+
+        // axis names
+
+        this.ctx.font = "bold 24px Roboto"
+        this.ctx.lineWidth = 1.5
+        this.ctx.fillStyle = "black"
+        this.ctx.textAlign = "right";
+        this.ctx.translate(35, 5)
+        this.ctx.rotate(-Math.PI/2) 
+        this.ctx.fillText(this.parameters[`ylabel`], 0, 0)
+        this.ctx.resetTransform()
+        this.ctx.fillText(this.parameters[`xlabel`], this.width-axisStartX+40, this.height-axisStartY+30)
         
     }
 }
