@@ -131,15 +131,16 @@ canvas {
 }
 
 /* Style for hovered strikethrough */
-.strikethroughHover:hover {
+/* .strikethroughHover:hover {
   text-decoration-line: line-through;
   text-decoration-thickness: 2px;
-}
+} */
 
 /* Style for selected elements */
-.selected {
-  background-color: lightblue;
+.singlyselected, .doublyselected{
+  background-color: paleturquoise;
 }
+
 
 .editorContainer{
   background-color: white;

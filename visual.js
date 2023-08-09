@@ -1,24 +1,21 @@
 import {Diagram} from './index.js'
-import { createElements } from './interactive.js'
+import { createElements, curveIndexToArrayIndex } from './interactive.js'
 
 let parameters = {
     // "curves": ["cost_curve", "price_floor", "demand_curve", "supply_curve", "AD_curve", "AS_curve"]
     "xlabel": "Q",
     "ylabel": "P",
-    "curves": ["demand_curve", "supply_curve"],
-    "demand_curve_stretch": 1,
-    "supply_curve_stretch": 1,
-    "demand_curve_shift": 0,
-    "supply_curve_shift": 0,
-    "laffer_curve_stretch": 1,
-    "laffer_curve_shift": 0
+    // "curves": ["demand_curve", "supply_curve"],
+    "curves": [
+    // {
+    // "type":"demand_curve", "stretch": 1, "shift": 0, "index": 0
+    // }, 
+    // {
+    //     "type":"supply_curve", "stretch": 1, "shift": 0, "index": 0
+    // }
+    ]
 }
 
-let sliderParameters = {
-    "demand_curve": {"type": "linear", "default_slope": 1}, 
-    
-
-}
 
 const canvas = document.querySelector("canvas")
 const ctx = canvas.getContext("2d")
@@ -61,16 +58,43 @@ if (!parameters.curves.includes("demand_curve")) {
     $("#demandSliders").addClass("hidden")
 }
 
+export function addCurve(curveData) { // TODO: add this into Diagram class
+    diagram1.parameters["curves"].push(curveData)
+    diagram1.display()
+}
+
+export function removeCurve(curveData) { // TODO: add this into Diagram class
+    const curveIndex = curveIndexToArrayIndex()
+}
 
 
 $(document).ready(() => {
 
-    for (const curve of parameters["curves"]) {
-        createElements(curve, diagram1)
-    }
+    // for (const curve of parameters["curves"]) {
+    // }
+    // createElements(parameters["curves"][0], diagram1)
 
-    
+    $("#singularCurveList").on("click", "li", function () {
+        $(this).addClass("singlyselected")
+        $(this).siblings().removeClass("singlyselected")
 
+        const curveIndex = parseInt($(this).data("curveindex"))- 1
+        const curveType = $(this).data("curveid")
+
+        const curveData = {"index": curveIndex, "type": curveType}
+        const curveIndexInArray = curveIndexToArrayIndex(parameters["curves"], curveData)
+
+        createElements(parameters["curves"][curveIndexInArray], diagram1)
+
+        console.log(curveType)
+        // console.log("Selected Curve Index:", parseInt($(this).data("curveindex"))- 1)
+        
+    });
+
+    $("#pairCurveList").on("click", "li", function () {
+        $(this).addClass("doublyselected")
+        $(this).siblings().removeClass("doublyselected")
+    });
     
 //     $("#showTR").change((e) => {
 //         const checkbox = $("showTR").get() 

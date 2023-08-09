@@ -138,8 +138,9 @@ export class Diagram {
         let intersections = []
 
         for (const curve of curves) {
+            
 
-            let curvePoints = this.generateBezierPoints(default_parameters[curve], this.parameters[`${curve}_stretch`], this.parameters[`${curve}_shift`])
+            let curvePoints = this.generateBezierPoints(default_parameters[curve["type"]], curve["stretch"], curve["shift"])
             allCurves.push(curvePoints)
             
             this.ctx.beginPath()
