@@ -21,7 +21,9 @@
       <h1>Economics Diagram Generator</h1>
 
       <div class="layoutGrid">
-        <div class="sliders"></div>
+        <div class="sliders">
+          <label id="slidercontainertext">Curve Editor</label>
+        </div>
         <div id="canvasContainer">
           <canvas id="canvas"></canvas>
           <button id="downloadbtn" download="canvas.jpg">Save Diagram</button>
@@ -48,13 +50,14 @@
           </div>
         </div>
         <div class="editorContainer">
-          <label>x-axis name</label>
-          <input id="xlabelname" type="text"></input>
-          <button id="xaxiseditorbutton">Change</button>
-          <button id="rotatebutton">Rotate</button>
-          <label>y-axis name</label>
-          <input id="ylabelname" type="text"></input>
-          <button id="yaxiseditorbutton">Change</button>
+          <!-- This part needs some cleaning -->
+          <label class="editorContainerElement">x-axis name</label>
+          <input class="editorContainerElement" id="xlabelname" type="text"></input>
+          <button class="editorContainerElement" id="xaxiseditorbutton">Change</button>
+          <button class="editorContainerElement" id="rotatebutton">Rotate</button>
+          <label class="editorContainerElement">y-axis name</label>
+          <input class="editorContainerElement" id="ylabelname" type="text"></input>
+          <button class="editorContainerElement" id="yaxiseditorbutton">Change</button>
 
         </div>
 

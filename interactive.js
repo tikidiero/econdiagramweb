@@ -47,7 +47,8 @@ export function curveIndexToArrayIndex(curveList, curveData) {
 
 export function createElements(curveData, diagram) {
 
-    $(".sliders").empty()
+    // $(".sliders").empty()
+    $('.sliders').find('*').not('#slidercontainertext').remove()
 
     const inputs = sliderData[curveData["type"]]["inputs"]
     const ranges = sliderData[curveData["type"]]["ranges"]

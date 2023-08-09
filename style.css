@@ -143,10 +143,23 @@ canvas {
 
 
 .editorContainer{
+  position:relative;
   background-color: white;
   width: 520%;
   height: 400%;
   border: 2px solid blue;
   box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
   border-radius: 5px; /* Add rounded corners */
+  text-align: center;
+}
+
+.editorContainerElement{
+  margin: 0;
+  position: relative;
+  top: 40%;
+}
+
+#slidercontainertext{
+  text-align: center;
+  width: 100%;
 }

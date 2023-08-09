@@ -282,8 +282,13 @@ export class Diagram {
         this.ctx.fillStyle = "black"
         this.ctx.textAlign = "right";
         this.ctx.translate(35, 5)
-        this.ctx.rotate(-Math.PI/2) 
-        this.ctx.fillText(this.parameters[`ylabel`], 0, 0)
+
+        if (this.parameters["rotated"]){
+            this.ctx.rotate(-Math.PI/2)
+            this.ctx.fillText(this.parameters[`ylabel`], 0, 0)
+        } else {
+            this.ctx.fillText(this.parameters[`ylabel`], -5, 30)
+        }
         this.ctx.resetTransform()
         this.ctx.fillText(this.parameters[`xlabel`], this.width-axisStartX+40, this.height-axisStartY+30)
         

@@ -5,6 +5,7 @@ let parameters = {
     // "curves": ["cost_curve", "price_floor", "demand_curve", "supply_curve", "AD_curve", "AS_curve"]
     "xlabel": "Q",
     "ylabel": "P",
+    "rotated": true,
     // "curves": ["demand_curve", "supply_curve"],
     "curves": [
     // {
@@ -89,12 +90,17 @@ $(document).ready(() => {
         console.log(curveType)
         // console.log("Selected Curve Index:", parseInt($(this).data("curveindex"))- 1)
         
-    });
+    })
 
     $("#pairCurveList").on("click", "li", function () {
         $(this).addClass("doublyselected")
         $(this).siblings().removeClass("doublyselected")
-    });
+    })
+
+    $("#rotatebutton").on("click", () => {
+        parameters["rotated"] = !parameters["rotated"] 
+        diagram1.display()
+    })
     
 //     $("#showTR").change((e) => {
 //         const checkbox = $("showTR").get() 
