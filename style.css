@@ -4,10 +4,6 @@ html, body {
   margin: 0;
   overflow: hidden;
   background-color: #f0f0f0;
-  /* background: linear-gradient(to right, #ff7f50, #87ceeb); */
-  /* background:
-    radial-gradient(circle, rgba(49,189,218,0.2) 0%, rgba(48,48,117,0.2) 35%, rgba(106,196,214,1) 100%),
-    url("https://assets.st-note.com/production/uploads/images/45667453/b580d004fd6b7dd07297fb9eac92d209.jpg"); */
   font-family: 'Roboto', sans-serif;
 }
 
@@ -36,6 +32,7 @@ h1{
   background-color: white;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
   border-radius: 5px;
+  border: 2px solid mediumorchid;
 }
 
 /* Style for labels */
@@ -59,42 +56,62 @@ label {
   border-radius: 5px; /* Add rounded corners */
 }
 
-/* Style for the curve list container */
+
 .curveListContainer {
-  display: inline-block;
-  height: 50px;
+  display: inline-block; 
+  /* height: 50px; */
+  /* width: 60%; */
   border: 2px solid cornflowerblue;
   padding: 0 20px;
   line-height: 50px;
-  margin: 5px;
-  margin-right: 10px;
+  /* margin: 5px;
+  margin-right: 10px; */
   position: relative;
   background-color: white;
-  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
-  border-radius: 5px; /* Add rounded corners */
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 5px; 
 }
 
 /* Style for singular curve container */
 .singular {
-  border: 2px solid red;
-  height: 500px;
+  border: 2px solid rgb(228, 182, 182);
+  /* height: 100%; */
 }
 
 /* Style for pairs curve container */
 .pairs {
-  border: 2px solid blue;
-  height: 500px;
+  border: 2px solid rgb(185, 185, 226);
+  /* height: 100%; */
+  /* right: 80px; */
 }
 
-/* Style for the layout grid */
+.points {
+  border: 2px solid rgb(206, 233, 201);
+}
+
+.pointAdd {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  width: 70%;
+  transform: translateX(-50%);
+  text-align: center;
+  background-color: #007bff;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+}
+
 .layoutGrid {
   display: grid;
-  grid-template-columns: 20% 40% 20% 20%;
+  grid-template-columns: 15% 40% 15% 15% 15%;
   gap: 20px;
   justify-content: space-around;
   width: 100%; /* Added width for proper alignment */
-  max-width: 1200px; /* Limit the maximum width of the grid */
+  max-width: 90%; /* Limit the maximum width of the grid */
   margin: 0 auto; /* Center the grid horizontally */
+  margin-bottom: 10
 }
 
 
@@ -109,6 +126,7 @@ canvas {
 #canvasContainer {
   background-color: white;
   padding: 10px;
+  border: 2px solid cadetblue;
   border-radius: 5px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 }
@@ -127,6 +145,9 @@ canvas {
   padding: 5px 10px;
   border: none;
   border-radius: 5px;
+}
+
+#addCurveButton:hover, #addCurvePairButton:hover{
   cursor: pointer;
 }
 
@@ -143,11 +164,13 @@ canvas {
 
 
 .editorContainer{
-  position:relative;
+  position: relative;
   background-color: white;
-  width: 520%;
-  height: 400%;
-  border: 2px solid blue;
+  /* width: 0%; */
+  margin: 2em;
+  /* max-width: 90%; */
+  height: 3em;
+  border: 2px solid linen;
   box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
   border-radius: 5px; /* Add rounded corners */
   text-align: center;
@@ -156,7 +179,7 @@ canvas {
 .editorContainerElement{
   margin: 0;
   position: relative;
-  top: 40%;
+  top: 30%;
 }
 
 #slidercontainertext{

@@ -34,7 +34,7 @@ export function curveIndexToArrayIndex(curveList, curveData) {
     let index = 0
     
     for (const curve of curveList) {
-        console.log("checking", curve, "against", curveData)
+        // console.log("checking", curve, "against", curveData)
         if (curve["type"] == curveData["type"] && curve["index"] == curveData["index"]) {
             return index 
         }
@@ -45,10 +45,14 @@ export function curveIndexToArrayIndex(curveList, curveData) {
 }
 
 
+export function clearSliders() {
+    $('.sliders').find('*').not('#slidercontainertext').remove()
+}
+
 export function createElements(curveData, diagram) {
 
     // $(".sliders").empty()
-    $('.sliders').find('*').not('#slidercontainertext').remove()
+    clearSliders()
 
     const inputs = sliderData[curveData["type"]]["inputs"]
     const ranges = sliderData[curveData["type"]]["ranges"]
@@ -226,7 +230,7 @@ $(document).ready(() => {
         }).length > 0
     
         if (isDuplicate) {
-            alert("This curve pair is already added loser.")
+            alert("This curve pair is already added.")
             return
         }
         
@@ -241,7 +245,7 @@ $(document).ready(() => {
         })
         listElement.on("mousedown", (e) => {
             if (e.which == 3) {
-                // removeCurve()
+
                 listElement.remove()
                 updatePairSelects()
             }
@@ -284,11 +288,21 @@ $(document).ready(() => {
 
         listElement.on("mousedown", (e) => {
             if (e.which == 3) {
+                const curveDataDelete = {
+                    "type": selectedCurve,
+                    "index": largestCurveIndex-1
+                }
+                removeCurve(curveDataDelete)
                 listElement.remove()
                 updatePairSelects()
             }
         })
         listElement.appendTo('#singularCurveList')
+
+        // const element = document.createElement('option')
+        // element.textContent= sliderData[selectedCurve]["curve_name"] + " Curve " + largestCurveIndex
+
+        // document.getElementById("curvesforpoints").appendChild(element)
 
         updatePairSelects()
         
@@ -320,6 +334,17 @@ $(document).ready(() => {
         document.body.appendChild(element)
         element.click()
         document.body.removeChild(element)
+    })
+
+    $("#addpointbutton").on("click", () => {
+
+        if ($("#curvesforpoints").val() != null) {
+        var element = document.createElement('li')
+        var pointindex = 1
+        element.textContent= "a" + pointindex
+        
+        document.getElementById("pointsList").appendChild(element)
+        }
     })
 
 })

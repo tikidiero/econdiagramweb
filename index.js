@@ -2,8 +2,9 @@ import {curveIntersections} from './bezier.js'
 
 //To Do:
 //Make checkbox work
-//Make multiple curves possible
-//change css so that more of the space is used
+//Make customizable points
+//Add area with selected pairs
+//Add more customization option (bg color, line color, etc.)
 
 
 let default_parameters = {
@@ -120,6 +121,15 @@ export class Diagram {
         return newPoints
     }
 
+    numberToSub(numb) {
+        let subscriptString = ""
+        const subscripts = {"0": "₀", "1": "₁", "2": "₂", "3": "₃", "4": "₄", "5": "₅", "6": "₆", "7": "₇" ,"8":"₈" ,"9":"₉"}
+        for (const chara of numb) {
+            subscriptString += subscripts[chara]
+        }
+        return subscriptString
+    }
+
     display()  {
 
         const curves = this.parameters.curves 
@@ -197,59 +207,59 @@ export class Diagram {
         }
         // console.log(intersections)
 
-        
+        // for (let intersection of intersections) {
+        //     this.ctx.beginPath();
+        //     this.ctx.arc(intersection[0], intersection[1], 5, 0, 2 * Math.PI);
+        //     this.ctx.fillStyle = 'black';
+        //     this.ctx.fill();
+        //     this.ctx.lineWidth = 3;
+        //     this.ctx.strokeStyle = 'black';
+        //     this.ctx.stroke();
 
-        for (let intersection of intersections) {
-            this.ctx.beginPath();
-            this.ctx.arc(intersection[0], intersection[1], 5, 0, 2 * Math.PI);
-            this.ctx.fillStyle = 'black';
-            this.ctx.fill();
-            this.ctx.lineWidth = 3;
-            this.ctx.strokeStyle = 'black';
-            this.ctx.stroke();
+        //     // Draw dotted line from intersection to x-axis
+        //     this.ctx.setLineDash([5, 5]); // Set line dash pattern for dotted line
+        //     this.ctx.beginPath();
+        //     this.ctx.moveTo(intersection[0], intersection[1]);
+        //     this.ctx.lineTo(intersection[0], this.height); // Draw the dotted line to the x-axis
+        //     this.ctx.strokeStyle = "black";
+        //     this.ctx.stroke();
 
-            // Draw dotted line from intersection to x-axis
-            this.ctx.setLineDash([5, 5]); // Set line dash pattern for dotted line
-            this.ctx.beginPath();
-            this.ctx.moveTo(intersection[0], intersection[1]);
-            this.ctx.lineTo(intersection[0], this.height); // Draw the dotted line to the x-axis
-            this.ctx.strokeStyle = "black";
-            this.ctx.stroke();
 
-            // Draw dotted line from intersection to y-axis
-            this.ctx.beginPath();
-            this.ctx.moveTo(intersection[0], intersection[1]);
-            this.ctx.lineTo(0, intersection[1]); // Draw the dotted line to the y-axis
-            this.ctx.strokeStyle = "black";
-            this.ctx.stroke();
 
-            // Reset line dash pattern to solid
-            this.ctx.setLineDash([]);
+        //     // Draw dotted line from intersection to y-axis
+        //     this.ctx.beginPath();
+        //     this.ctx.moveTo(intersection[0], intersection[1]);
+        //     this.ctx.lineTo(0, intersection[1]); // Draw the dotted line to the y-axis
+        //     this.ctx.strokeStyle = "black";
+        //     this.ctx.stroke();
 
-            //Shade PS area
-            this.ctx.fillStyle = "rgb(0, 228, 0, 0.2)"
-            this.ctx.beginPath()
-            this.ctx.moveTo(0, intersection[1]) //Start point (0, Pm)
-            this.ctx.lineTo(intersection[0], intersection[1]) //Equilibrium
-            this.ctx.lineTo(0, maxY) //End point (0, 0) => calculate y coords with y-int later
-            this.ctx.closePath()
-            this.ctx.fill()
+        //     // Reset line dash pattern to solid
+        //     this.ctx.setLineDash([]);
 
-            //Shade CS area
-            this.ctx.fillStyle = "rgb(0, 0, 228, 0.2)"
-            this.ctx.beginPath()
-            this.ctx.moveTo(0, intersection[1]) //Start point (0, Pm)
-            this.ctx.lineTo(intersection[0], intersection[1]) //Equilibrium
-            this.ctx.lineTo(0, minY) //End point (0, 0) => calculate y coords with y-int later
-            this.ctx.closePath()
-            this.ctx.fill()
+        //     //Shade PS area
+        //     this.ctx.fillStyle = "rgb(0, 228, 0, 0.2)"
+        //     this.ctx.beginPath()
+        //     this.ctx.moveTo(0, intersection[1]) //Start point (0, Pm)
+        //     this.ctx.lineTo(intersection[0], intersection[1]) //Equilibrium
+        //     this.ctx.lineTo(0, maxY) //End point (0, 0) => calculate y coords with y-int later
+        //     this.ctx.closePath()
+        //     this.ctx.fill()
 
-            //Shade TR area
-            // this.ctx.fillStyle = "rgb(228, 0, 0, 0.1)"
-            // this.ctx.fillRect(0, intersection[1], intersection[0], this.height-intersection[1])
+        //     //Shade CS area
+        //     this.ctx.fillStyle = "rgb(0, 0, 228, 0.2)"
+        //     this.ctx.beginPath()
+        //     this.ctx.moveTo(0, intersection[1]) //Start point (0, Pm)
+        //     this.ctx.lineTo(intersection[0], intersection[1]) //Equilibrium
+        //     this.ctx.lineTo(0, minY) //End point (0, 0) => calculate y coords with y-int later
+        //     this.ctx.closePath()
+        //     this.ctx.fill()
+
+        //     //Shade TR area
+        //     // this.ctx.fillStyle = "rgb(228, 0, 0, 0.1)"
+        //     // this.ctx.fillRect(0, intersection[1], intersection[0], this.height-intersection[1])
             
             
-        }
+        // }
         this.ctx.resetTransform()
 
         const axisStartX = this.width*(1-scaleFactor)
@@ -259,7 +269,18 @@ export class Diagram {
         this.ctx.fillStyle = "rgb(255,255,255)" 
         this.ctx.fillRect(0, 0, axisStartX, this.height)
         this.ctx.fillRect(0, this.height - axisStartY, this.width, this.height)
-        
+
+        // this.ctx.setTransform(scaleFactor, 0, 0, scaleFactor, this.width*(1-scaleFactor), 0);
+        // for (let intersection of intersections) {
+            
+        //     this.ctx.font = "bold 24px Roboto"
+        //     this.ctx.lineWidth = 1.5
+        //     this.ctx.fillStyle = "black"
+        //     this.ctx.textAlign = "center"
+        //     this.ctx.fillText("Q" + this.numberToSub("3"), intersection[0], this.height*1.05)
+        //     this.ctx.fillText("P" + this.numberToSub("5"), -this.width*0.05, intersection[1])
+        // }
+        // this.ctx.resetTransform()
 
         // Draw x-axis
         this.ctx.strokeStyle = 'black';
@@ -292,6 +313,19 @@ export class Diagram {
         this.ctx.resetTransform()
         this.ctx.fillText(this.parameters[`xlabel`], this.width-axisStartX+40, this.height-axisStartY+30)
         
+        // let testparameters = this.parameters["curves"]
+
+        // console.log("should print index", this.parameters["curves"][0])
+        // console.log("testparams", testparameters[0]["index"])
+        // console.log(this.parameters["curves"]["index"])
+
+        this.ctx.beginPath();
+        this.ctx.arc(50, 50, 5, 0, 2 * Math.PI);
+        this.ctx.fillStyle = 'black';
+        this.ctx.fill();
+        this.ctx.lineWidth = 3;
+        this.ctx.strokeStyle = 'black';
+        this.ctx.stroke();
     }
 }
 

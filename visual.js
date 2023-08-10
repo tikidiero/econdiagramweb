@@ -1,5 +1,5 @@
 import {Diagram} from './index.js'
-import { createElements, curveIndexToArrayIndex } from './interactive.js'
+import { createElements, curveIndexToArrayIndex, clearSliders } from './interactive.js'
 
 let parameters = {
     // "curves": ["cost_curve", "price_floor", "demand_curve", "supply_curve", "AD_curve", "AS_curve"]
@@ -51,6 +51,7 @@ $("#xaxiseditorbutton").on("click", () => {
 $("#yaxiseditorbutton").on("click", () => {
     yaxislabel = $("#ylabelname").val()
     parameters[`ylabel`] = yaxislabel
+    
     diagram1.display()
 })
 
@@ -65,7 +66,20 @@ export function addCurve(curveData) { // TODO: add this into Diagram class
 }
 
 export function removeCurve(curveData) { // TODO: add this into Diagram class
-    const curveIndex = curveIndexToArrayIndex()
+    const curveIndex = curveIndexToArrayIndex(diagram1.parameters["curves"], curveData)
+    const selectedCurves = $(".singlyselected")
+    for (const selectedCurve of selectedCurves) {
+        const selectedCurveElement = $(selectedCurve)
+        const selectedCurveIndex = parseInt(selectedCurveElement.data("curveindex"))-1
+        const selectedCurveType = selectedCurveElement.data("curveid")
+        if (curveData["type"] == selectedCurveType && curveData["index"] == selectedCurveIndex) {
+            clearSliders()
+        }
+        diagram1.parameters["curves"].splice(curveIndex, 1)
+    }
+
+    diagram1.display()
+
 }
 
 
@@ -87,7 +101,9 @@ $(document).ready(() => {
 
         createElements(parameters["curves"][curveIndexInArray], diagram1)
 
-        console.log(curveType)
+        $("#pointlabel").text($(this).text())
+
+        // console.log($(this).data())
         // console.log("Selected Curve Index:", parseInt($(this).data("curveindex"))- 1)
         
     })
