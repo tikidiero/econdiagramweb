@@ -1,5 +1,5 @@
 import {Diagram} from './index.js'
-import { createElements, curveIndexToArrayIndex, clearSliders } from './interactive.js'
+import { createElements, curveIndexToArrayIndex, clearSliders, encodeHTMLData, decodeHTMLData } from './interactive.js'
 
 let parameters = {
     // "curves": ["cost_curve", "price_floor", "demand_curve", "supply_curve", "AD_curve", "AS_curve"]
@@ -17,6 +17,13 @@ let parameters = {
     ]
 }
 
+// let curveEditorData = {
+//     "demand":{"comboset": 2, "pair": ["TR", "CS", "PS"]},
+//     "supply":{"comboset": 2, "pair": ["TR", "CS"]},
+//     "AD": {"comboset": 2, "pair": ["DWL"]}
+
+// }
+
 
 const canvas = document.querySelector("canvas")
 const ctx = canvas.getContext("2d")
@@ -26,7 +33,6 @@ const ctx = canvas.getContext("2d")
 // const devicePixelRatio = window.devicePixelRatio || 1;
 // canvas.width = 600;
 const divWidth = $("#canvasContainer").width()
-console.log("divwidth", divWidth)
 canvas.width = divWidth;
 canvas.height = divWidth;
 
@@ -67,17 +73,20 @@ export function addCurve(curveData) { // TODO: add this into Diagram class
 
 export function removeCurve(curveData) { // TODO: add this into Diagram class
     const curveIndex = curveIndexToArrayIndex(diagram1.parameters["curves"], curveData)
-    const selectedCurves = $(".singlyselected")
+    const selectedCurves = $(".selectedElement")
+
     for (const selectedCurve of selectedCurves) {
         const selectedCurveElement = $(selectedCurve)
-        const selectedCurveIndex = parseInt(selectedCurveElement.data("curveindex"))-1
-        const selectedCurveType = selectedCurveElement.data("curveid")
+        const selectedCurveData = decodeHTMLData(selectedCurveElement.data("targetcurve"))
+        const selectedCurveType = selectedCurveData["type"]
+        const selectedCurveIndex = selectedCurveData["index"]
+
         if (curveData["type"] == selectedCurveType && curveData["index"] == selectedCurveIndex) {
             clearSliders()
         }
-        diagram1.parameters["curves"].splice(curveIndex, 1)
+        
     }
-
+    diagram1.parameters["curves"].splice(curveIndex, 1)
     diagram1.display()
 
 }
@@ -89,29 +98,48 @@ $(document).ready(() => {
     // }
     // createElements(parameters["curves"][0], diagram1)
 
-    $("#singularCurveList").on("click", "li", function () {
-        $(this).addClass("singlyselected")
-        $(this).siblings().removeClass("singlyselected")
+    // $("#singularCurveList").on("click", "li", function () { // click li 
 
-        const curveIndex = parseInt($(this).data("curveindex"))- 1
-        const curveType = $(this).data("curveid")
+    //     const curveIndex = parseInt($(this).data("index"))- 1
+    //     const curveType = $(this).data("type")
 
-        const curveData = {"index": curveIndex, "type": curveType}
-        const curveIndexInArray = curveIndexToArrayIndex(parameters["curves"], curveData)
+    //     console.log(curveIndex)
 
-        createElements(parameters["curves"][curveIndexInArray], diagram1)
+    //     const curveData = {"index": curveIndex, "type": curveType}
+    //     const curveIndexInArray = curveIndexToArrayIndex(parameters["curves"], curveData)
 
-        $("#pointlabel").text($(this).text())
+    //     createElements(parameters["curves"][curveIndexInArray], diagram1)
 
-        // console.log($(this).data())
-        // console.log("Selected Curve Index:", parseInt($(this).data("curveindex"))- 1)
+    //     $("#pointlabel").text($(this).text())
+
+    //     // console.log($(this).data())
+    //     // console.log("Selected Curve Index:", parseInt($(this).data("curveindex"))- 1)
         
+    // })
+
+    $(`.updateCurveSlider`).on("input", () => { // slider
+        const value = $(this).val()
+        
+        if (input == "angle") {
+            diagram.parameters["curves"][parameterArrayIndex]["stretch"] = degreesToSlope(parseFloat(value)) 
+        }
+        if (input == "shift") {
+            diagram.parameters["curves"][parameterArrayIndex]["shift"] = value
+        }
+        if (input == "stretch") {
+            diagram.parameters["curves"][parameterArrayIndex]["stretch"] = value
+        }
+        diagram.display()
+        $(`#${valueID}`).val($(`#${inputID}`).val())
+
     })
 
-    $("#pairCurveList").on("click", "li", function () {
-        $(this).addClass("doublyselected")
-        $(this).siblings().removeClass("doublyselected")
-    })
+    
+
+    // $("#pointsList").on("click", "li", function () {
+    //     $('*').removeClass("selectedElement")
+    //     $(this).addClass("selectedElement")
+    // })
 
     $("#rotatebutton").on("click", () => {
         parameters["rotated"] = !parameters["rotated"] 

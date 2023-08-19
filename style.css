@@ -157,10 +157,6 @@ canvas {
   text-decoration-thickness: 2px;
 } */
 
-/* Style for selected elements */
-.singlyselected, .doublyselected{
-  background-color: paleturquoise;
-}
 
 
 .editorContainer{
@@ -185,4 +181,13 @@ canvas {
 #slidercontainertext{
   text-align: center;
   width: 100%;
+}
+
+/* .selectable {
+  border: 1px dotted blue;  
+} */
+
+/* Style for selected elements */
+.selectedElement {
+  background-color: paleturquoise;
 }

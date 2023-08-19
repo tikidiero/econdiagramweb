@@ -130,6 +130,18 @@ export class Diagram {
         return subscriptString
     }
 
+    generateIntersections() {
+        const curves = this.parameters.curves 
+        let allCurves = []
+        let intersections = []
+        for (const curve of curves) {
+            
+
+            let curvePoints = this.generateBezierPoints(default_parameters[curve["type"]], curve["stretch"], curve["shift"])
+            allCurves.push(curvePoints)
+        }
+    }
+
     display()  {
 
         const curves = this.parameters.curves 
@@ -313,12 +325,7 @@ export class Diagram {
         this.ctx.resetTransform()
         this.ctx.fillText(this.parameters[`xlabel`], this.width-axisStartX+40, this.height-axisStartY+30)
         
-        // let testparameters = this.parameters["curves"]
-
-        // console.log("should print index", this.parameters["curves"][0])
-        // console.log("testparams", testparameters[0]["index"])
-        // console.log(this.parameters["curves"]["index"])
-
+        //Try to get points along the curves
         this.ctx.beginPath();
         this.ctx.arc(50, 50, 5, 0, 2 * Math.PI);
         this.ctx.fillStyle = 'black';
