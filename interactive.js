@@ -234,6 +234,8 @@ $(document).ready(() => {
         $('*').removeClass("selectedElement")
         $(this).addClass("selectedElement")
         const interactiveData = decodeHTMLData($(this).data("interactivedata"))
+        const targetCurveData = decodeHTMLData($(this).data("targetcurve"))
+
         for (const elementData of interactiveData) {
 
             
@@ -242,6 +244,7 @@ $(document).ready(() => {
                 const curveData = elementData["data"]
                 const range = elementData["range"]
                 const input = elementData["input"]
+
     
                 console.table(elementData)
 
@@ -250,7 +253,7 @@ $(document).ready(() => {
                 const divID = ID + "_div"
                 const inputID = ID + "_slider"
                 const valueID = ID + "_value"
-                const labelName = `${sliderData[curveData["type"]]["curve_name"]} ${curveData["index"]+1} ${input}`   
+                const labelName = `${CURVE_DATA[curveData["type"]]["curve_name"]} ${curveData["index"]+1} ${input}`
         
                 // const parameterArrayIndex = curveIndexToArrayIndex(diagram.parameters["curves"], curveData)
         
@@ -264,8 +267,9 @@ $(document).ready(() => {
                 const minVal = range[0]
                 const maxVal = range[1]
                 // const currVal = currInputValue ? currInputValue : (minVal + maxVal)/2
-                const currVal = 0
+                console.log(targetCurveData)
                 const rangeVal = maxVal - minVal
+                const currVal = targetCurveData[input]
         
         
         
@@ -278,20 +282,24 @@ $(document).ready(() => {
                 }).appendTo(`#${divID}`)
                 
                 $('<input>',  {  
-                    id: inputID,
+                    class: "variableInput",
                     type: "range",
                     min: minVal.toString(),
                     max: maxVal.toString(),
                     value: currVal.toString(),
-                    step: rangeVal.toString() / 100.0
+                    step: rangeVal.toString() / 100.0,
+                    "data-targetcurve": encodeHTMLData(curveData),
+                    "data-inputtype": input
                 }).appendTo(`#${divID}`)
         
                 $('<input>',  {  
-                    id: valueID,
+                    class: "variableInput",
                     type: "number",
                     min: minVal.toString(),
                     max: maxVal.toString(),
-                    value: currVal.toString()
+                    value: currVal.toString(),
+                    "data-targetcurve": encodeHTMLData(curveData),
+                    "data-inputtype": input
                 }).appendTo(`#${divID}`)
                         
                 
@@ -299,7 +307,48 @@ $(document).ready(() => {
                 console.log("radio box")
             }
         }
-        console.log("I AM SELECTED")
+
+    })
+
+
+    $(document).on("input", ".variableInput", function() {
+
+        const newVal = $(this).val()
+
+        const curveData = decodeHTMLData($(this).data("targetcurve"))
+        const inputType = $(this).data("inputtype")
+
+
+        const allCurves = $("#singularCurveList li")
+        for (const curveHTML of allCurves) {
+            // console.log(curveHTML)
+            const listCurveData = decodeHTMLData($(curveHTML).data("targetcurve"))
+            if (listCurveData["type"] === curveData["type"] && listCurveData["index"] === curveData["index"]) { 
+            
+                listCurveData[inputType] = parseFloat(newVal)
+                $(curveHTML).data("targetcurve", encodeHTMLData(listCurveData))
+
+                const sameInputTypes = $(".variableInput").filter((HTMLobj) => {
+                    return $(HTMLobj).data("inputtype") === inputType
+                })
+
+                console.log(sameInputTypes)
+
+                for (const sameInputType of sameInputTypes) {
+                    console.log((sameInputType))
+                }
+
+
+    
+            }
+            // console.log(listCurveData)
+        }
+        
+        
+        // console.log("shift", curveData["shift"])
+
+        // console.table(curveData)
+        // console.log(inputType)
     })
 
 
@@ -394,6 +443,7 @@ $(document).ready(() => {
             "type": selectedCurveType,
             "stretch": 1,
             "shift": 0,
+            "angle": 45,
             "index": largestCurveIndex
         }
         console.log(curveData)
