@@ -22,7 +22,7 @@ h1{
 }
 
 /* Style for the sliders container */
-.sliders {
+.editor {
   opacity: 0.9;
   display: flex;
   flex-direction: column;
@@ -190,4 +190,11 @@ canvas {
 /* Style for selected elements */
 .selectedElement {
   background-color: paleturquoise;
+}
+
+input[type=radio],
+input.radio {
+  float: left;
+  clear: none;
+  margin: 2px 0 0 2px;
 }

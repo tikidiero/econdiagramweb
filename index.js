@@ -272,6 +272,26 @@ export class Diagram {
             
             
         // }
+
+        for (const point of this.parameters.points) {
+            const active = point["active"]
+            const pointData = point[active]
+            if (active == "coordinate") {
+                const x = pointData["x"] / 100. * this.width
+                const y = (100 - pointData["y"]) / 100. * this.height
+
+                
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, 5, 0, 2 * Math.PI);
+                this.ctx.fillStyle = 'black';
+                this.ctx.fill();
+                this.ctx.lineWidth = 3;
+                this.ctx.strokeStyle = 'black';
+                this.ctx.stroke();
+            }
+
+        }
+
         this.ctx.resetTransform()
 
         const axisStartX = this.width*(1-scaleFactor)
@@ -326,13 +346,10 @@ export class Diagram {
         this.ctx.fillText(this.parameters[`xlabel`], this.width-axisStartX+40, this.height-axisStartY+30)
         
         //Try to get points along the curves
-        this.ctx.beginPath();
-        this.ctx.arc(50, 50, 5, 0, 2 * Math.PI);
-        this.ctx.fillStyle = 'black';
-        this.ctx.fill();
-        this.ctx.lineWidth = 3;
-        this.ctx.strokeStyle = 'black';
-        this.ctx.stroke();
+
+
+
+
     }
 }
 
