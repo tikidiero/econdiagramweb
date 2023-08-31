@@ -75,10 +75,29 @@ export function encodeHTMLData(object) {
 }
 
 export function decodeHTMLData(text) {
-    return JSON.parse(decodeURI(text))
+    try {
+        return JSON.parse(decodeURI(text))
+    } catch (error) {
+        if (error instanceof SyntaxError) {
+            return
+        }
+        throw error
+    }
 
 }
 
+
+function findObjectWithValueInArrayOfObjects(arrayOfObjects, key, value){
+
+    const objects = []
+
+    for (const object of arrayOfObjects) {
+        if (object[key] === value) {
+            objects.push(object) 
+        }
+    }
+    return objects
+}
 
 function isSameCurve(curveData1, curveData2) {
     return curveData1["type"] === curveData2["type"] && curveData1["index"] === curveData2["index"]
@@ -134,6 +153,25 @@ function generateSliderInputCombo(labelName, minVal, maxVal, currVal, targetCurv
     
 }
 
+function setValueOfInput(value, input) {
+    if (input.is("select")) {
+        console.log("input is select", input)
+        console.log("input children", input.find("option"))
+        console.log("testing", input.val())
+        input.find("option").each(function() { 
+            console.log("option", option, "value", option.val())
+            if (option.val() === value) {
+                option.attr("selected", "selected")
+                
+            } else {
+                option.removeAttr("selected")
+            }
+        })
+        return    
+    }
+    input.val(value) 
+}
+
 $(document).ready(() => {
     for (const curveName of Object.keys(CURVE_DATA)) {
 
@@ -161,6 +199,7 @@ $(document).ready(() => {
         $('*').removeClass("selectedElement")
         $(this).addClass("selectedElement")
         const interactiveData = decodeHTMLData($(this).data("interactivedata"))
+        
         const targetCurveData = decodeHTMLData($(this).data("targetcurve"))
         const targetPointData = decodeHTMLData($(this).data("targetpoint"))
         console.log("interactive data")
@@ -193,13 +232,13 @@ $(document).ready(() => {
                 
             } else if (elementData["type"] === "radio") {
                 const inputData = elementData["input"]
-                console.log(targetCurveData)
-                console.log(targetCurveData["points"])
+                console.log("POINT DATA", targetCurveData)
                 const radioName = "radio"
 
                 for (const radioData of inputData){
                     const labelName = radioData
-            
+                    const isChecked = targetCurveData["active"] === radioData 
+
                     $(`<label>`, {
                         for: labelName,
                         text: CURVE_DATA[radioData]["curve_name"],
@@ -210,7 +249,7 @@ $(document).ready(() => {
                         id: labelName, 
                         class: "toggleableInput",
                         type: "radio",
-                        
+                        checked: isChecked,
                         "data-inputtype": radioData
                     }).appendTo(editorDiv)
                     
@@ -221,40 +260,121 @@ $(document).ready(() => {
         }
 
     })
-
+    
     $(document).on("input", ".toggleableInput", function() {
         
         $(".editoreditor").remove()
-        
+        const selectedClassData = decodeHTMLData($(".selectedElement").data("targetcurve"))
+        const selectedClassInteractiveData = decodeHTMLData($(".selectedElement").data("interactivedata"))
         const inputType = $(this).data("inputtype")
+        const radioOptions = selectedClassInteractiveData[0]["input"]
+        const selectedRadio = $(this).attr("id")
+        
+        console.log("selectedRadio", selectedRadio)
+        console.log("selectedClass", selectedClassData)
+        console.log("interactive data ", selectedClassInteractiveData[0]["input"])
+        selectedClassData["active"] = inputType
+        
+        
+        const active = selectedClassData["active"]
+        const currentlySelectedRadio = selectedClassData[active]
+        console.log("currentlySelectedRadio", currentlySelectedRadio)
+
+        
+        
+        // const sliderInputCombos = findObjectWithValueInArrayOfObjects(currentlySelectedRadio, "type", "sliderInputCombo")
+        // console.log("sliderInputCombos saved data:", sliderInputCombos)
+
+        // console.log("alongCurveVal", alongCurveVal)
 
         const radioInput = {
         "alongcurve": 
-            generateSliderInputCombo("Along The Curve", 0, 100, 50, "", "alongCurve", "pointsVariableInput")
+            generateSliderInputCombo("Along The Curve", 0, 100, 50, "", "tValue", "variableInput pointsVariableInput tValue")
                 .concat($("<select>", {
-                    class: "allCurveDropdown",
-                    id: "alongCurveDropdown"
+                    class: "allCurveDropdown selectedCurve",
+                    id: "alongCurveDropdown",
+                    "data-inputtype": "selectedCurve"
                 }
         )),
         "intersection": [
             $("<select>", {
-                class: "allCurveDropdown intersection",
-                id: "curve1"
+                class: "allCurveDropdown intersection intersectionSelectA",
+                id: "intersectionSelectA",
+                "data-inputtype": "intersectionSelectA"
             }), 
             $("<p>", {
                 text: " and ",
                 style: "display: inline;"
             }),
             $("<select>", {
-                class: "allCurveDropdown intersection",
-                id: "curve2"
+                class: "allCurveDropdown intersection intersectionSelectB",
+                id: "intersectionSelectB",
+                "data-inputtype": "intersectionSelectB"
             })
         ], 
         "coordinates":
-            generateSliderInputCombo("X coordinate", 0, 100, 50, "", "coordinateX", "pointsVariableInput")
+            generateSliderInputCombo("X coordinate", 0, 100, 50, "", "coordinateX", "variableInput pointsVariableInput coordinateX")
                 .concat($("<br/>"))
-                .concat(generateSliderInputCombo("Y coordinate", 0, 100, 50, "", "coordinateY", "pointsVariableInput"))
+                .concat(generateSliderInputCombo("Y coordinate", 0, 100, 50, "", "coordinateY", "variableInput pointsVariableInput coordinateY"))
         }
+
+        
+
+        // iterate over radioInput and find HTML elements that have the same data, and then set the value of the HTML element to the value of sliderInputCombos (with the same data)
+        for (const radioInputType of Object.keys(radioInput)) {
+            const elements = radioInput[radioInputType]
+            for (const element of elements) {
+                const elementInputType = element.data("inputtype")
+                const className = element.attr("class")
+                // console.log("class", className)
+
+                if (elementInputType) {
+                    for (const sliderInputCombo of currentlySelectedRadio) {
+                        const sliderInputClass = sliderInputCombo["class"]
+                        const sliderInputValue = sliderInputCombo["value"]
+                        // console.log("sliderInputCombo", sliderInputCombo)
+                        // console.log("inputClass", sliderInputClass)
+                        // console.log("inputValue", sliderInputValue)
+                        // console.log("inputType", inputType)
+
+                        if (elementInputType === sliderInputClass) {
+                            // console.log("MATCHES!! setting ", element, "s value to ", sliderInputValue)
+                            // element.val(sliderInputValue)
+                            setValueOfInput(sliderInputValue, element)
+                        }
+                    }
+
+                }
+                // else if (className) {
+                //     const dropdown = $("#alongCurveDropdown")
+                //     const lastClass = className.split(" ").pop()
+                //     console.log("radioInput", elements)
+                //     console.log("lastClass", lastClass)
+                //     console.log(radioOptions)
+                //     console.log("testingtesting1234", selectedClassData)
+                //     for (const inputData of selectedClassData[selectedRadio]){
+                //         console.log("inputData", inputData)
+                //         if (inputData["class"] == lastClass){
+                //             console.log("matching", inputData["class"], "with ", lastClass)
+                //             console.log(inputData["value"])
+                //             console.log(document.querySelector("#alongCurveDropdown"))
+                //             dropdown.val(inputData["value"])
+                //         }
+                //     }
+                    
+                //     console.log("inputType", inputType)
+
+                // }
+    
+            }
+            // for (const inputData of selectedClassData["alongcurve"]){
+            //     if (inputData["class"] == "selectedCurve"){
+            //         inputData["value"] = $("#alongCurveDropdown").val()
+            //     }
+            // }
+            // console.log(elements)
+        }
+        //  console.log("radioInput", radioInput)
 
         const generateInputs = radioInput[inputType]
         const newInputsDiv =  $("<div>", {
@@ -267,11 +387,6 @@ $(document).ready(() => {
         
         $("#curveList").trigger("curves:change")
 
-        const selectedClassData = decodeHTMLData($(".selectedElement").data("targetcurve"))
-        console.log("selectedClass", selectedClassData)
-        console.log("active before: ", selectedClassData["active"])
-        selectedClassData["active"] = inputType
-        console.log("active after: ", selectedClassData["active"])
         $(".selectedElement").data("targetcurve", encodeHTMLData(selectedClassData))
 
     })
@@ -280,7 +395,13 @@ $(document).ready(() => {
     $(document).on("input", "#alongCurveDropdown", function() {
 
         const selectedClassData = decodeHTMLData($(".selectedElement").data("targetcurve"))
-        selectedClassData["alongcurve"]["curve1"] = $("#alongCurveDropdown").val()
+
+        for (const inputData of selectedClassData["alongcurve"]){
+            if (inputData["class"] == "selectedCurve"){
+                inputData["value"] = $("#alongCurveDropdown").val()
+            }
+        }
+
         $(".selectedElement").data("targetcurve", encodeHTMLData(selectedClassData))
 
     })
@@ -288,37 +409,16 @@ $(document).ready(() => {
     $(document).on("input", ".intersection", function() {
 
         const id = $(this).attr("id")
-
         const selectedClassData = decodeHTMLData($(".selectedElement").data("targetcurve"))
-        selectedClassData["intersection"][id] = $("#"+id).val()
+
+        for (const inputData of selectedClassData["intersection"]){
+
+            if (inputData["class"] == id){
+                console.log("matched")
+                inputData["value"] = $("#"+id).val()
+            }
+        }
         $(".selectedElement").data("targetcurve", encodeHTMLData(selectedClassData))
-
-    })
-
-    $(document).on("input", "pointsVariableInput", function() {
-
-        const newVal = parseFloat($(this).val())
-
-        const curveData = decodeHTMLData($(this).data("targetpoint"))
-        const inputType = $(this).data("inputtype")
-
-        const selectedClassData = decodeHTMLData($(".selectedElement").data("targetpoint"))
-
-        if (inputType == "coordinateX"){ // points 
-            
-            selectedClassData["coordinate"]["x"] = newVal
-            $(".selectedElement").data("targetpoint", encodeHTMLData(selectedClassData))
-        }
-
-        if (inputType == "coordinateY"){
-            selectedClassData["coordinate"]["y"] = newVal
-            $(".selectedElement").data("targetpoint", encodeHTMLData(selectedClassData))
-        }
-
-        if (inputType == "alongCurve"){
-            selectedClassData["alongcurve"]["t"] = newVal/100
-            $(".selectedElement").data("targetpoint", encodeHTMLData(selectedClassData))
-        }
 
     })
 
@@ -326,14 +426,14 @@ $(document).ready(() => {
 
         const newVal = parseFloat($(this).val())
 
-        const curveData = decodeHTMLData($(this).data("targetcurve"))
+        const curveData = decodeHTMLData($(this).data("targetcurve")) // data from the slider
         const inputType = $(this).data("inputtype")
+        const selectedClassData = decodeHTMLData($(".selectedElement").data("targetcurve")) // data from the selected element 
 
-        const selectedClassData = decodeHTMLData($(".selectedElement").data("targetcurve"))
-
-        let sameInputTypes = []
+        const sameInputTypes = []
 
         for (const variableInput of $(".variableInput")) {
+            // console.log("searching this varaibleinputtype:",$(variableInput).data("inputtype"), "and matching with", inputType )
             if ($(variableInput).data("inputtype") === inputType) { 
                 sameInputTypes.push(variableInput)
             }
@@ -342,6 +442,17 @@ $(document).ready(() => {
             $(variableInput).val(newVal)
         }
 
+        const active = selectedClassData["active"]
+        if (active) {
+            const userInputData = selectedClassData[active]
+
+            for (const singleInputDataElement of userInputData) {
+                if (inputType === singleInputDataElement["class"] )
+                    singleInputDataElement["value"] = newVal
+            }
+
+            $(".selectedElement").data("targetcurve", encodeHTMLData(selectedClassData))
+        }
 
         if (curveData !== "") { // shifting stuff
             
@@ -519,7 +630,8 @@ $(document).ready(() => {
             // console.log("adding shorthandname", shorthandName)
             const curveOption = $("<option>", {
                 "data-targetcurve": encodeHTMLData(targetCurveData),
-                text: shorthandName
+                text: shorthandName,
+                value: shorthandName
             })
             curveOptions.push(curveOption)
 
@@ -561,7 +673,7 @@ $(document).ready(() => {
 
         for (const addedPoint of addedPoints) {
             const addedPointElement = $(addedPoint)
-            const targetPointData = decodeHTMLData(addedPointElement.data("targetpoint")) //CHANGE "targetcurve" TO "targetpoint". DOES NOT WORK BECAUSE OF ENCODEHTML.
+            const targetPointData = decodeHTMLData(addedPointElement.data("targetcurve")) //CHANGE "targetcurve" TO "targetpoint". DOES NOT WORK BECAUSE OF ENCODEHTML.
             const pointIndex = targetPointData["index"]
             // const pointType = targetPointData["type"]
         
@@ -573,12 +685,21 @@ $(document).ready(() => {
         }
         largestPointIndex += 1
 
-        const pointData = {
+        const defaultPointData = {
             "index": largestPointIndex,
-            "coordinate": {"x": 1, "y": 54}, 
-            "intersection": {"curve1": "D1", "curve2": "D2"}, 
-            "alongcurve": {"t": 0.58, "curve1": "D1"},
-            "active": "coordinate"
+            "coordinates": [
+                {"value": 50, "type": "sliderInputCombo", "class": "coordinateX"},
+                {"value": 50, "type": "sliderInputCombo", "class": "coordinateY"}
+            ], 
+            "intersection": [
+                {"value": "", "type": "select", "class": "intersectionSelectA"},
+                {"value": "", "type": "select", "class": "intersectionSelectB"}
+            ], 
+            "alongcurve": [
+                {"value": "", "type": "select", "class": "selectedCurve"},
+                {"value": 50, "type": "sliderInputCombo", "class": "tValue"}
+            ],
+            "active": "coordinates"
         }
 
         const interactiveData = [{
@@ -588,7 +709,7 @@ $(document).ready(() => {
 
         const element = $('<li>', {
             "data-interactivedata": encodeHTMLData(interactiveData),
-            "data-targetpoint": encodeHTMLData(pointData),
+            "data-targetcurve": encodeHTMLData(defaultPointData),
             "text": "Point" + (largestPointIndex+1),
             "class": "selectable"
         })

@@ -128,3 +128,9 @@ $(document).ready(() => {
     diagram1.display()
 
 })
+
+$(document).ready(() =>{
+    $(document).on("input", ".variableInput", function() {
+        console.log("parameters ", parameters)
+    })
+})
