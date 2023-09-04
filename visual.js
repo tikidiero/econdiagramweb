@@ -131,6 +131,6 @@ $(document).ready(() => {
 
 $(document).ready(() =>{
     $(document).on("input", ".variableInput", function() {
-        console.log("parameters ", parameters)
+        // console.log("parameters ", parameters)
     })
 })

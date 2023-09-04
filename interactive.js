@@ -40,6 +40,8 @@ const sliderData = {
     "stretch": [0, 5]
 }
 
+const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ💢abcdefghijklmnopqrstuvwxyz"
+
 function degreesToSlope(degrees) {
     return Math.tan(degrees*Math.PI/180)
 }
@@ -87,7 +89,7 @@ export function decodeHTMLData(text) {
 }
 
 
-function findObjectWithValueInArrayOfObjects(arrayOfObjects, key, value){
+export function findObjectWithValueInArrayOfObjects(arrayOfObjects, key, value){
 
     const objects = []
 
@@ -111,7 +113,7 @@ function findSameCurve(curveDatas, matchCurveData) {
     }
 }
 
-function  updatePointToDiagram() {
+function updatePointToDiagram() {
     const diagram = getDiagram()
     const pointsList = $("pointsList")
     for (const pointHTML of pointsList) {
@@ -153,24 +155,18 @@ function generateSliderInputCombo(labelName, minVal, maxVal, currVal, targetCurv
     
 }
 
-function setValueOfInput(value, input) {
-    if (input.is("select")) {
-        console.log("input is select", input)
-        console.log("input children", input.find("option"))
-        console.log("testing", input.val())
-        input.find("option").each(function() { 
-            console.log("option", option, "value", option.val())
-            if (option.val() === value) {
-                option.attr("selected", "selected")
-                
-            } else {
-                option.removeAttr("selected")
-            }
-        })
-        return    
+function updatePoints() {
+    const diagram = getDiagram()
+    const allPointData = []
+    const pointsListElements = $("#pointsList li")
+    for (const point of pointsListElements) {
+        allPointData.push(decodeHTMLData($(point).data("targetcurve")))
     }
-    input.val(value) 
+
+    diagram.parameters["points"] = allPointData
+    diagram.display()
 }
+
 
 $(document).ready(() => {
     for (const curveName of Object.keys(CURVE_DATA)) {
@@ -201,7 +197,6 @@ $(document).ready(() => {
         const interactiveData = decodeHTMLData($(this).data("interactivedata"))
         
         const targetCurveData = decodeHTMLData($(this).data("targetcurve"))
-        const targetPointData = decodeHTMLData($(this).data("targetpoint"))
         console.log("interactive data")
         console.table(interactiveData)
         
@@ -252,9 +247,24 @@ $(document).ready(() => {
                         checked: isChecked,
                         "data-inputtype": radioData
                     }).appendTo(editorDiv)
-                    
-                    
+
+                    $("<br/>").appendTo(editorDiv)
                 }
+
+
+
+                
+            } else if (elementData["type"] === "text") {
+
+                const data = elementData["data"]
+                console.log(data)
+
+                $("<label>", { //MAKE THIS WORK (label doesnt show)
+                    for: "labelText",
+                    text: elementData["label"]
+                }).appendTo(editorDiv)
+                
+                $("<input>", data).appendTo(editorDiv)
 
             }
         }
@@ -295,6 +305,8 @@ $(document).ready(() => {
                     id: "alongCurveDropdown",
                     "data-inputtype": "selectedCurve"
                 }
+                
+
         )),
         "intersection": [
             $("<select>", {
@@ -319,6 +331,16 @@ $(document).ready(() => {
         }
 
         
+        const generateInputs = radioInput[inputType]
+        const newInputsDiv =  $("<div>", {
+            "class": "editoreditor"
+        })
+        for (const generateInput of generateInputs) {
+            generateInput.appendTo(newInputsDiv)
+        }
+        newInputsDiv.appendTo(".editor")
+        
+        $("#curveList").trigger("curves:change")
 
         // iterate over radioInput and find HTML elements that have the same data, and then set the value of the HTML element to the value of sliderInputCombos (with the same data)
         for (const radioInputType of Object.keys(radioInput)) {
@@ -332,15 +354,11 @@ $(document).ready(() => {
                     for (const sliderInputCombo of currentlySelectedRadio) {
                         const sliderInputClass = sliderInputCombo["class"]
                         const sliderInputValue = sliderInputCombo["value"]
-                        // console.log("sliderInputCombo", sliderInputCombo)
-                        // console.log("inputClass", sliderInputClass)
-                        // console.log("inputValue", sliderInputValue)
-                        // console.log("inputType", inputType)
 
                         if (elementInputType === sliderInputClass) {
-                            // console.log("MATCHES!! setting ", element, "s value to ", sliderInputValue)
-                            // element.val(sliderInputValue)
-                            setValueOfInput(sliderInputValue, element)
+                            element.val(sliderInputValue)
+
+                            
                         }
                     }
 
@@ -376,19 +394,9 @@ $(document).ready(() => {
         }
         //  console.log("radioInput", radioInput)
 
-        const generateInputs = radioInput[inputType]
-        const newInputsDiv =  $("<div>", {
-            "class": "editoreditor"
-        })
-        for (const generateInput of generateInputs) {
-            generateInput.appendTo(newInputsDiv)
-        }
-        newInputsDiv.appendTo(".editor")
         
-        $("#curveList").trigger("curves:change")
-
         $(".selectedElement").data("targetcurve", encodeHTMLData(selectedClassData))
-
+        
     })
 
 
@@ -424,7 +432,7 @@ $(document).ready(() => {
 
     $(document).on("input", ".variableInput", function() {
 
-        const newVal = parseFloat($(this).val())
+        const newVal = $(this).val()
 
         const curveData = decodeHTMLData($(this).data("targetcurve")) // data from the slider
         const inputType = $(this).data("inputtype")
@@ -451,8 +459,17 @@ $(document).ready(() => {
                     singleInputDataElement["value"] = newVal
             }
 
-            $(".selectedElement").data("targetcurve", encodeHTMLData(selectedClassData))
         }
+        if (inputType === "text") {
+            const saveAs = $(this).data("saveas") // label 
+            selectedClassData[saveAs] = newVal
+            console.log("selectedClassData", selectedClassData)
+            $(".selectedElement").text(selectedClassData["label"])
+        }
+        console.log("inputtype", inputType)
+
+        $(".selectedElement").data("targetcurve", encodeHTMLData(selectedClassData))
+
 
         if (curveData !== "") { // shifting stuff
             
@@ -479,9 +496,9 @@ $(document).ready(() => {
                 }
 
                 diagram.display()
+            }
         }
-        }
-
+        updatePoints()
         
     })
 
@@ -687,9 +704,10 @@ $(document).ready(() => {
 
         const defaultPointData = {
             "index": largestPointIndex,
+            "label": ALPHABET[largestPointIndex],
             "coordinates": [
-                {"value": 50, "type": "sliderInputCombo", "class": "coordinateX"},
-                {"value": 50, "type": "sliderInputCombo", "class": "coordinateY"}
+                {"value": "50", "type": "sliderInputCombo", "class": "coordinateX"},
+                {"value": "50", "type": "sliderInputCombo", "class": "coordinateY"}
             ], 
             "intersection": [
                 {"value": "", "type": "select", "class": "intersectionSelectA"},
@@ -697,7 +715,7 @@ $(document).ready(() => {
             ], 
             "alongcurve": [
                 {"value": "", "type": "select", "class": "selectedCurve"},
-                {"value": 50, "type": "sliderInputCombo", "class": "tValue"}
+                {"value": "50", "type": "sliderInputCombo", "class": "tValue"}
             ],
             "active": "coordinates"
         }
@@ -705,12 +723,29 @@ $(document).ready(() => {
         const interactiveData = [{
             "input": ["alongcurve", "intersection", "coordinates"],
             "type": "radio"
-        }]
+        },
+        {
+            "input": "text",
+            "type": "text",
+            "label": "Enter Label",
+            "data": {
+                type: "text",
+                placeholder: "Enter Label",
+                maxlength: "5",
+                value: ALPHABET[largestPointIndex], 
+                class: "variableInput",
+                "data-inputtype": "text",
+                "data-saveas": "label",
+                id: "labelText"
+                
+            }
+        }
+    ]
 
         const element = $('<li>', {
             "data-interactivedata": encodeHTMLData(interactiveData),
             "data-targetcurve": encodeHTMLData(defaultPointData),
-            "text": "Point" + (largestPointIndex+1),
+            "text": "Point " + ALPHABET[largestPointIndex],
             "class": "selectable"
         })
         element.appendTo("#pointsList")
@@ -721,7 +756,7 @@ $(document).ready(() => {
                 element.remove()
             }
         })
-
+        updatePoints()
     })
 
 })

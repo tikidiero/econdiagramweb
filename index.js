@@ -1,4 +1,5 @@
 import {curveIntersections} from './bezier.js'
+import {findObjectWithValueInArrayOfObjects} from './interactive.js'
 
 //To Do:
 //Make checkbox work
@@ -30,7 +31,8 @@ export class Diagram {
       this.xlabel = xlabel
       this.ylabel = ylabel
     }
-    
+
+
     transform(points, dilationFactor, shiftFactor, curveName) {
         let newPoints = []; 
         for (let point of points) {
@@ -276,10 +278,16 @@ export class Diagram {
         for (const point of this.parameters.points) {
             const active = point["active"]
             const pointData = point[active]
-            if (active == "coordinate") {
-                const x = pointData["x"] / 100. * this.width
-                const y = (100 - pointData["y"]) / 100. * this.height
+            if (active == "coordinates") {
+                console.log(point)
+                const percentX = findObjectWithValueInArrayOfObjects(point["coordinates"], "class", "coordinateX")[0]["value"]
+                const percentY = findObjectWithValueInArrayOfObjects(point["coordinates"], "class", "coordinateY")[0]["value"]
+                const pointLabel = point["label"]
+                // console.log("percents", percentX, percentY)
 
+                const x = percentX / 100. * this.width
+                const y = (100 - percentY) / 100. * this.height
+                console.log("draiwng point at ", x, y)
                 
                 this.ctx.beginPath();
                 this.ctx.arc(x, y, 5, 0, 2 * Math.PI);
@@ -288,6 +296,12 @@ export class Diagram {
                 this.ctx.lineWidth = 3;
                 this.ctx.strokeStyle = 'black';
                 this.ctx.stroke();
+
+                this.ctx.font = "bold 16px Roboto"
+                this.ctx.lineWidth = 1.5
+                this.ctx.fillStyle = "black"
+                this.ctx.textAlign = "left"
+                this.ctx.fillText(pointLabel, x+10, y+10)
             }
 
         }
