@@ -1,5 +1,5 @@
-import {curveIntersections} from './bezier.js'
-import {findObjectWithValueInArrayOfObjects} from './interactive.js'
+import {curveIntersections, evaluate} from './bezier.js'
+import {findObjectWithValueInArrayOfObjects, CURVE_DATA} from './interactive.js'
 
 //To Do:
 //Make checkbox work
@@ -30,6 +30,8 @@ export class Diagram {
       this.parameters = parameters 
       this.xlabel = xlabel
       this.ylabel = ylabel
+
+      this.scaleFactor = 0.9
     }
 
 
@@ -123,11 +125,17 @@ export class Diagram {
         return newPoints
     }
 
+    // abcdₑfgₕᵢⱼₖₗₘₙₒₚqᵣₛₜᵤᵥwₓyz
+
     numberToSub(numb) {
         let subscriptString = ""
         const subscripts = {"0": "₀", "1": "₁", "2": "₂", "3": "₃", "4": "₄", "5": "₅", "6": "₆", "7": "₇" ,"8":"₈" ,"9":"₉"}
         for (const chara of numb) {
-            subscriptString += subscripts[chara]
+            if (!isNaN(chara)) {
+                subscriptString += subscripts[chara]
+            } else {
+                subscriptString += chara 
+            }
         }
         return subscriptString
     }
@@ -144,6 +152,40 @@ export class Diagram {
         }
     }
 
+    displayLatex(equation, x, y) {
+        // const equation = "\\mathrm{x} = \\sin \\left( \\frac{\\pi}{2} \\right)";
+        const svg = MathJax.tex2svg(equation).firstElementChild
+        const img = document.createElement('img')
+
+        img.onload = (e) => {
+            
+            const tempWidth = e.target.naturalWidth;
+            const tempHeight = e.target.naturalHeight;
+
+            this.ctx.setTransform(this.scaleFactor, 0, 0, this.scaleFactor, this.width*(1-this.scaleFactor), 0)
+            this.ctx.drawImage(e.target, x, y, tempWidth, tempHeight)
+        }
+        img.src = 'data:image/svg+xml;base64,' + btoa('<?xml version="1.0" encoding="UTF-8" standalone="no" ?>\n' + svg.outerHTML);
+
+    }
+
+    drawPoint(label, x, y) {
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, 5, 0, 2 * Math.PI);
+        this.ctx.fillStyle = 'black';
+        this.ctx.fill();
+        this.ctx.lineWidth = 3;
+        this.ctx.strokeStyle = 'black';
+        this.ctx.stroke();
+
+        this.ctx.font = "bold 16px Roboto"
+        this.ctx.lineWidth = 1.5
+        this.ctx.fillStyle = "black"
+        this.ctx.textAlign = "left"
+
+        this.ctx.fillText(this.numberToSub(label), x+10, y+10)
+    }
+
     display()  {
 
         const curves = this.parameters.curves 
@@ -154,8 +196,7 @@ export class Diagram {
         this.ctx.fillStyle = "rgb(228,246,248)" //"rgb(228,246,248)"
         this.ctx.fillRect(0, 0, this.width, this.height)
 
-        const scaleFactor = 0.9
-        this.ctx.setTransform(scaleFactor, 0, 0, scaleFactor, this.width*(1-scaleFactor), 0);
+        this.ctx.setTransform(this.scaleFactor, 0, 0, this.scaleFactor, this.width*(1-this.scaleFactor), 0)
 
 
         let allCurves = []
@@ -165,7 +206,8 @@ export class Diagram {
             
 
             let curvePoints = this.generateBezierPoints(default_parameters[curve["type"]], curve["stretch"], curve["shift"])
-            allCurves.push(curvePoints)
+
+            allCurves.push({"points": curvePoints, "curveData": curve})
             
             this.ctx.beginPath()
             this.ctx.moveTo(curvePoints[0], curvePoints[1])
@@ -178,17 +220,29 @@ export class Diagram {
 
         
 
-        const newAllCurves = [...allCurves]
+        const newAllCurves = structuredClone(allCurves)
+        const labeledIntersections =  {}
 
         for (let i = newAllCurves.length-1; i >= 0; i--) {
             for (let j = 0; j < newAllCurves.length-1; j++) {
                 // console.log(i, j)
-                if (!this.sameLine(newAllCurves[i], newAllCurves[j])) {
-                    let foundIntersections = curveIntersections(newAllCurves[i], newAllCurves[j], 0.0, 1.0, 0.0, 1.0,
+                if (!this.sameLine(newAllCurves[i]["points"], newAllCurves[j]["points"])) {
+
+                    let foundIntersections = curveIntersections(newAllCurves[i]["points"], newAllCurves[j]["points"], 0.0, 1.0, 0.0, 1.0,
                         1.0, false, 0, 25, 0.5)
                     for (let foundIntersection of foundIntersections) {
                         intersections.push(foundIntersection[1])
                         intersections.push(foundIntersection[3])
+
+                        const curveData1 = newAllCurves[i]["curveData"]
+                        const curveData2 = newAllCurves[j]["curveData"]
+                        
+                        const label1 = CURVE_DATA[curveData1["type"]]["shorthand"] + (curveData1["index"]+1)
+                        const label2 = CURVE_DATA[curveData2["type"]]["shorthand"] + (curveData2["index"]+1)
+                        const labelToUse = label1 + " " + label2
+
+                        labeledIntersections[labelToUse] = this.removeSimilarPoints([foundIntersection[1], foundIntersection[3]])
+                    
                     }
                 }
                 
@@ -199,7 +253,7 @@ export class Diagram {
             
         }
         intersections = this.removeSimilarPoints(intersections)
-        
+
         const allYIntercepts = []
         for (const curve of allCurves) {
             const firstPointY = curve[1]
@@ -277,68 +331,106 @@ export class Diagram {
 
         for (const point of this.parameters.points) {
             const active = point["active"]
+            const pointLabel = point["label"]
             const pointData = point[active]
             if (active == "coordinates") {
-                console.log(point)
                 const percentX = findObjectWithValueInArrayOfObjects(point["coordinates"], "class", "coordinateX")[0]["value"]
                 const percentY = findObjectWithValueInArrayOfObjects(point["coordinates"], "class", "coordinateY")[0]["value"]
-                const pointLabel = point["label"]
-                // console.log("percents", percentX, percentY)
 
                 const x = percentX / 100. * this.width
                 const y = (100 - percentY) / 100. * this.height
-                console.log("draiwng point at ", x, y)
-                
-                this.ctx.beginPath();
-                this.ctx.arc(x, y, 5, 0, 2 * Math.PI);
-                this.ctx.fillStyle = 'black';
-                this.ctx.fill();
-                this.ctx.lineWidth = 3;
-                this.ctx.strokeStyle = 'black';
-                this.ctx.stroke();
 
-                this.ctx.font = "bold 16px Roboto"
-                this.ctx.lineWidth = 1.5
-                this.ctx.fillStyle = "black"
-                this.ctx.textAlign = "left"
-                this.ctx.fillText(pointLabel, x+10, y+10)
+                this.drawPoint(pointLabel, x, y)
+                
+
+            }
+
+            if (active == "alongcurve"){
+                const tValue = findObjectWithValueInArrayOfObjects(point["alongcurve"], "class", "tValue")[0]["value"]
+                const selectedCurve = findObjectWithValueInArrayOfObjects(point["alongcurve"], "class", "selectedCurve")[0]["value"]
+
+                let foundCurve
+
+                for (const curve of curves) {
+                    const shorthand = CURVE_DATA[curve["type"]]["shorthand"] + (curve["index"]+1)
+                    if (shorthand === selectedCurve)
+                        foundCurve = curve
+                }
+                
+                if (foundCurve) {
+                    let curvePoints = this.generateBezierPoints(default_parameters[foundCurve["type"]], foundCurve["stretch"], foundCurve["shift"])
+                    const [x, y] = evaluate(curvePoints, tValue/100, 0)
+                    // console.log("EVALUATED AT t=0.5", ev)
+                    this.drawPoint(pointLabel, x, y)
+
+                }
+                }
+            
+            if (active == "intersection"){
+
+                const curveA = findObjectWithValueInArrayOfObjects(point["intersection"], "class", "intersectionSelectA")[0]["value"]
+                const curveB = findObjectWithValueInArrayOfObjects(point["intersection"], "class", "intersectionSelectB")[0]["value"]
+
+                const curveLabel = curveA + " " + curveB
+                const curveLabel2 = curveB + " " + curveA
+
+                let intersectionPoint = labeledIntersections[curveLabel]
+                
+                if (!intersectionPoint)
+                    intersectionPoint = labeledIntersections[curveLabel2]
+
+                if (intersectionPoint) {
+                    // console.log("intesrctoin POINT", intersectionPoint)
+                    const [x, y] = intersectionPoint[0] // TODO: support for multiple points
+                    this.drawPoint(pointLabel, x, y)
+                }
+
+                
+
+                
+
+                // // Draw dotted line from intersection to x-axis
+                // this.ctx.setLineDash([5, 5]); // Set line dash pattern for dotted line
+                // this.ctx.beginPath();
+                // this.ctx.moveTo(intersection[0], intersection[1]);
+                // this.ctx.lineTo(intersection[0], this.height); // Draw the dotted line to the x-axis
+                // this.ctx.strokeStyle = "black";
+                // this.ctx.stroke();
+
+
+
+                // // Draw dotted line from intersection to y-axis
+                // this.ctx.beginPath();
+                // this.ctx.moveTo(intersection[0], intersection[1]);
+                // this.ctx.lineTo(0, intersection[1]); // Draw the dotted line to the y-axis
+                // this.ctx.strokeStyle = "black";
+                // this.ctx.stroke();
             }
 
         }
 
         this.ctx.resetTransform()
 
-        const axisStartX = this.width*(1-scaleFactor)
-        const axisStartY = this.height*(1-scaleFactor)
+        const axisStartX = this.width*(1-this.scaleFactor)
+        const axisStartY = this.height*(1-this.scaleFactor)
         
 
         this.ctx.fillStyle = "rgb(255,255,255)" 
         this.ctx.fillRect(0, 0, axisStartX, this.height)
         this.ctx.fillRect(0, this.height - axisStartY, this.width, this.height)
 
-        // this.ctx.setTransform(scaleFactor, 0, 0, scaleFactor, this.width*(1-scaleFactor), 0);
-        // for (let intersection of intersections) {
-            
-        //     this.ctx.font = "bold 24px Roboto"
-        //     this.ctx.lineWidth = 1.5
-        //     this.ctx.fillStyle = "black"
-        //     this.ctx.textAlign = "center"
-        //     this.ctx.fillText("Q" + this.numberToSub("3"), intersection[0], this.height*1.05)
-        //     this.ctx.fillText("P" + this.numberToSub("5"), -this.width*0.05, intersection[1])
-        // }
-        // this.ctx.resetTransform()
 
         // Draw x-axis
         this.ctx.strokeStyle = 'black';
         this.ctx.lineWidth = 5;
         this.ctx.beginPath();
         this.ctx.moveTo(axisStartX, 0);
-        this.ctx.lineTo(axisStartX, this.height - this.height*(1-scaleFactor)/1);
+        this.ctx.lineTo(axisStartX, this.height - this.height*(1-this.scaleFactor)/1);
         this.ctx.stroke();
                 
         // Draw y-axis
         this.ctx.beginPath();
-        this.ctx.moveTo(this.width*(1-scaleFactor)/1, this.height - axisStartY);
+        this.ctx.moveTo(this.width*(1-this.scaleFactor)/1, this.height - axisStartY);
         this.ctx.lineTo(this.width, this.height - axisStartY);
         this.ctx.stroke();
 
@@ -361,8 +453,7 @@ export class Diagram {
         
         //Try to get points along the curves
 
-
-
+       
 
     }
 }

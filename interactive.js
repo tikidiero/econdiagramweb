@@ -1,6 +1,6 @@
 import { addCurve, removeCurve, getDiagram } from "./visual.js"
 
-const CURVE_DATA = {
+export const CURVE_DATA = {
     "demand_curve": {
         "id": "demand_slider",
         "curve_name": "Demand",
@@ -120,7 +120,7 @@ function updatePointToDiagram() {
         const newPointsList = []
 
         const targetCurve = decodeHTML(pointHTML.data("targetcurve"))
-        console.log(targetCurve)
+        // console.log(targetCurve)
     }
 }
 
@@ -197,8 +197,10 @@ $(document).ready(() => {
         const interactiveData = decodeHTMLData($(this).data("interactivedata"))
         
         const targetCurveData = decodeHTMLData($(this).data("targetcurve"))
-        console.log("interactive data")
-        console.table(interactiveData)
+        // console.log("interactive data")
+        // console.table(interactiveData)
+        
+        const toTriggerInput = []
         
         for (const elementData of interactiveData) {
             
@@ -227,7 +229,7 @@ $(document).ready(() => {
                 
             } else if (elementData["type"] === "radio") {
                 const inputData = elementData["input"]
-                console.log("POINT DATA", targetCurveData)
+                // console.log("POINT DATA", targetCurveData)
                 const radioName = "radio"
 
                 for (const radioData of inputData){
@@ -239,25 +241,28 @@ $(document).ready(() => {
                         text: CURVE_DATA[radioData]["curve_name"],
                     }).appendTo(editorDiv)
                     
-                    $('<input>',  {  
+                    const radioButton = $('<input>',  {  
                         name: radioName,
                         id: labelName, 
                         class: "toggleableInput",
                         type: "radio",
                         checked: isChecked,
                         "data-inputtype": radioData
-                    }).appendTo(editorDiv)
+                    })
+
+
+                    toTriggerInput.push(radioButton)
+                    radioButton.appendTo(editorDiv)
 
                     $("<br/>").appendTo(editorDiv)
+                    
                 }
-
-
-
                 
             } else if (elementData["type"] === "text") {
 
                 const data = elementData["data"]
-                console.log(data)
+                data["value"] = targetCurveData[data["data-saveas"]] 
+                // console.log("elementData", elementData)
 
                 $("<label>", { //MAKE THIS WORK (label doesnt show)
                     for: "labelText",
@@ -268,6 +273,10 @@ $(document).ready(() => {
 
             }
         }
+        toTriggerInput.forEach((HTMLElement) => {
+            HTMLElement.trigger("input")
+        })
+        
 
     })
     
@@ -280,15 +289,15 @@ $(document).ready(() => {
         const radioOptions = selectedClassInteractiveData[0]["input"]
         const selectedRadio = $(this).attr("id")
         
-        console.log("selectedRadio", selectedRadio)
-        console.log("selectedClass", selectedClassData)
-        console.log("interactive data ", selectedClassInteractiveData[0]["input"])
+        // console.log("selectedRadio", selectedRadio)
+        // console.log("selectedClass", selectedClassData)
+        // console.log("interactive data ", selectedClassInteractiveData[0]["input"])
         selectedClassData["active"] = inputType
         
         
         const active = selectedClassData["active"]
         const currentlySelectedRadio = selectedClassData[active]
-        console.log("currentlySelectedRadio", currentlySelectedRadio)
+        // console.log("currentlySelectedRadio", currentlySelectedRadio)
 
         
         
@@ -397,6 +406,8 @@ $(document).ready(() => {
         
         $(".selectedElement").data("targetcurve", encodeHTMLData(selectedClassData))
         
+        // console.log("REDISPLAYING")
+        getDiagram().display()
     })
 
 
@@ -427,7 +438,8 @@ $(document).ready(() => {
             }
         }
         $(".selectedElement").data("targetcurve", encodeHTMLData(selectedClassData))
-
+        // getDiagram().display()
+        updatePoints() 
     })
 
     $(document).on("input", ".variableInput", function() {
@@ -437,6 +449,8 @@ $(document).ready(() => {
         const curveData = decodeHTMLData($(this).data("targetcurve")) // data from the slider
         const inputType = $(this).data("inputtype")
         const selectedClassData = decodeHTMLData($(".selectedElement").data("targetcurve")) // data from the selected element 
+        const HTMLInputType = $(this).attr("type")
+
 
         const sameInputTypes = []
 
@@ -460,13 +474,12 @@ $(document).ready(() => {
             }
 
         }
-        if (inputType === "text") {
-            const saveAs = $(this).data("saveas") // label 
+        if (HTMLInputType === "text") {
+            const saveAs = $(this).data("saveas")
             selectedClassData[saveAs] = newVal
-            console.log("selectedClassData", selectedClassData)
             $(".selectedElement").text(selectedClassData["label"])
+            // $(".selectedElement").data("targetcurve", selectedClassData)
         }
-        console.log("inputtype", inputType)
 
         $(".selectedElement").data("targetcurve", encodeHTMLData(selectedClassData))
 
@@ -731,12 +744,28 @@ $(document).ready(() => {
             "data": {
                 type: "text",
                 placeholder: "Enter Label",
-                maxlength: "5",
+                maxlength: "50",
                 value: ALPHABET[largestPointIndex], 
                 class: "variableInput",
                 "data-inputtype": "text",
-                "data-saveas": "label",
+                "data-saveas": "label", // override "label" interactiveData ("defaultPointData" as seen above)
                 id: "labelText"
+                
+            }
+        },
+        {
+            "input": "text",
+            "type": "text",
+            "label": "Enter Favorite Food",
+            "data": {
+                type: "text",
+                placeholder: "Enter Favorite Food",
+                maxlength: "5",
+                value: ALPHABET[largestPointIndex], 
+                class: "variableInput",
+                "data-inputtype": "favoritefood",
+                "data-saveas": "favfood", // override "label" interactiveData ("defaultPointData" as seen above)
+                id: "favfood"
                 
             }
         }
