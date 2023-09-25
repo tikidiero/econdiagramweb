@@ -12,11 +12,27 @@ let default_parameters = {
     "demand_curve": [[0 ,0], [1 ,1]],
     "supply_curve": [[0, 1], [1, 0]],
     "laffer_curve": [[0, 1], [0.5, 0.2], [1, 1]],
+    "vertical_line": [[0.5, 0], [0.5, 1]],
+    "horizontal_line": [[0, 0.5], [1, 0.5]]
 }
 
-export class Curve { 
-    constructor(curveType, stretch, shift) {
 
+
+export class Curve {  // diagram.curves = [Curve, Curve, ...]
+
+    constructor(curveType, x_stretch, y_stretch, x_shift, y_shift, displayName, index) { // CurveType, float, float 
+        this.curveType = curveType
+        this.x_stretch = x_stretch
+        this.y_stretch = y_stretch 
+        this.x_shift = x_shift
+        this.y_shift = y_shift
+        this.displayName = displayName
+        this.index = index
+
+    }
+
+    display() {
+        
     }
 }
 
